@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+python -m order_generator.agents_app
