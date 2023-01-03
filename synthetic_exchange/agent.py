@@ -1,6 +1,6 @@
 import itertools
 
-from synthetic_exchange.transaction import Transaction
+# from synthetic_exchange.transaction import Transaction
 
 
 class Agent:
@@ -56,6 +56,7 @@ class Agent:
     def quantity_bought(self):
         return self._quantity_bought
 
+    """
     @staticmethod
     def get_last_price(marketId):
         p = 0.0
@@ -64,3 +65,4 @@ class Agent:
         # else:
         #    p = (market.max_price - market.min_price) / 2
         return p
+    """

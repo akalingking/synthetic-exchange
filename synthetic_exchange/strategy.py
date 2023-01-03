@@ -21,6 +21,7 @@ class Strategy(ABC):
         self._process = None
         self._timeout = 3
         self._stop = mp.Event()
+        self._agent_id = 0
 
     @property
     def order_event(self):
@@ -29,6 +30,14 @@ class Strategy(ABC):
     @property
     def name(self) -> str:
         return self._name
+
+    @property
+    def agent_id(self) -> int:
+        return self._agent_id
+
+    @agent_id.setter
+    def agent_id(self, value: int):
+        self._agent_id = value
 
     def start(self):
         self._process = mp.Process(target=__class__._do_work, args=(self,))
@@ -78,6 +87,7 @@ class RandomUniform(Strategy):
             self._order_event.subscribe(kwargs.get("handler"))
 
     def do_work(self):
+        assert self._agent_id is not None
         side = random.choice(["BUY", "SELL"])
         prices = np.arange(self._min_price, self._max_price, self._tick_size)
         price = np.random.choice(prices)
@@ -85,7 +95,7 @@ class RandomUniform(Strategy):
         # self._order_event.emit((self._market_id, self._symbol, side, price, quantity))
         order = {
             "marketId": self._market_id,
-            "agentId": 0,
+            "agentId": self._agent_id,
             "dateTime": dt.datetime.utcnow(),
             "symbol": self._symbol,
             "side": side,
@@ -109,6 +119,7 @@ class RandomNormal(Strategy):
             self._order_event.subscribe(kwargs.get("handler"))
 
     def do_work(self):
+        assert self._agent_id is not None
         side = random.choice(["BUY", "SELL"])
         std = 0.1 * self._last_price
         price = np.random.normal(self._last_price, std)
@@ -117,7 +128,7 @@ class RandomNormal(Strategy):
         # self._order_event.emit((self._market_id, self._symbol, side, price, quantity))
         order = {
             "marketId": self._market_id,
-            "agentId": 0,
+            "agentId": self._agent_id,
             "dateTime": dt.datetime.utcnow(),
             "symbol": self._symbol,
             "side": side,

@@ -29,7 +29,7 @@ class Market:
         np.random.seed(100)
         self._symbol = symbol
         self._id = next(__class__._counter)
-        self._transaction_counter = 0
+        # self._transaction_counter = 0
         self._min_price = minPrice
         self._max_price = maxPrice
         self._tick_size = tickSize
@@ -105,13 +105,14 @@ class Market:
     def min_quantity(self):
         return self._min_quantity
 
-    @property
-    def transaction_counter(self):
-        return self._transaction_counter
+    # @property
+    # def transaction_counter(self):
+    #    #return self._transaction_counter
+    #    return Transaction.transaction_counter
 
-    @transaction_counter.setter
-    def transaction_counter(self, value):
-        self._transaction_counter = value
+    # @transaction_counter.setter
+    # def transaction_counter(self, value):
+    #    self._transaction_counter = value
 
     def start(self, n=1000, clearAt=10000):
         # c = 1
@@ -210,4 +211,17 @@ class Market:
         retval = None
         if marketId in __class__._markets:
             retval = __class__._markets[marketId].max_price
+        return retval
+
+    @staticmethod
+    def get_last_price(marketId):
+        retval = None
+        if marketId in __class__._markets:
+            if marketId in Transaction.history:
+                retval = Transaction.history[marketId][-1].price
+            else:
+                market = __class__._markets[marketId]
+                retval = (market.max_price - market.min_price) / 2
+        else:
+            logging.error(f"{__class__.__name__}.get_last_price {marketId} not found")
         return retval

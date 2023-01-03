@@ -6,6 +6,6 @@ per-file-ignores =
     synthetic-exchange/**/*.pxd: E225,E226,E251,E999
     test/**/*.pyx: E225,E226,E251,E999
     test/**/*.pxd: E225,E226,E251,E999
-max-line-length = 80
+max-line-length = 120
 max-complexity = 18
 select = B,C,E,F,W,T4,B9

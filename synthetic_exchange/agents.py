@@ -1,3 +1,4 @@
+import logging
 import time
 from multiprocessing import Process
 
@@ -28,6 +29,14 @@ class Agents:
         assert isinstance(agents, list)
         for agent in agents:
             self._agents[agent.id] = agent
+
+    def get(self, agentId: int) -> Agent:
+        retval = None
+        if agentId in self._agents:
+            retval = self._agents[agentId]
+        else:
+            logging.error(f"{__class__.__name__}.get {agentId} not found")
+        return retval
 
     def start(self):
         print(f"{__class__.__name__}.start entry")

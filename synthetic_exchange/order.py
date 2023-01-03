@@ -47,6 +47,10 @@ class Order:
     def quantity(self):
         return self._quantity
 
+    @quantity.setter
+    def quantity(self, value):
+        self._quantity = value
+
     """
     @staticmethod
     def from_dict(data: dict) -> Order:

@@ -1,7 +1,9 @@
 import logging
 import multiprocessing as mp
+import operator
 
 from synthetic_exchange.order import Order
+from synthetic_exchange.transaction import Transaction
 
 
 class OrderBook:
@@ -77,8 +79,139 @@ class OrderBook:
                     logging.error(f"{__class__.__name__}._do_work invalid order side: {order.side}")
         logging.info(f"{__class__.__name__}._do_work stopped")
 
-    def _process_sell(self, order: Order):
-        logging.info(f"{__class__.__name__}._process_sell {order}")
-
     def _process_buy(self, order: Order):
         logging.info(f"{__class__.__name__}._process_buy {order}")
+        assert order.side.lower() == "buy"
+        market_id = order.market_id
+        remaining_quantity = order.quantity
+        while True:
+            if len(self._active_sell_orders) > 0:
+                sell_orders = sorted(self._active_sell_orders, key=operator.attrgetter("price"))
+                best_offer: Order = sell_orders[0]
+                if order.price >= best_offer.price:
+                    transaction_price = best_offer.price
+                    if remaining_quantity > best_offer.quantity:
+                        transaction_quantity = best_offer.quantity
+                        Transaction(order, best_offer, market_id, transaction_price, transaction_quantity)
+                        self._remove_offer(best_offer)
+                        remaining_quantity -= transaction_quantity
+                        self.logging.info(
+                            f"{__class__.__name__}._process_buy order: {order.id} "
+                            f"partial fill remaining quantity: {remaining_quantity}"
+                        )
+                        # Find next best offer
+                    elif remaining_quantity == best_offer.quantity:
+                        transaction_quantity = best_offer.quantity
+                        Transaction(order, best_offer, market_id, transaction_price, transaction_quantity)
+                        self._remove_offer(best_offer)
+                        self.logging.info(
+                            f"{__class__.__name__}._process_buy order: {order.id} executed "
+                            f"order quantity == offer quantity"
+                        )
+                        break
+                    else:
+                        transaction_quantity = remaining_quantity
+                        Transaction(order, best_offer, market_id, transaction_price, transaction_quantity)
+                        self._reduce_offer(best_offer, transaction_quantity)
+                        self.logging.info(
+                            f"{__class__.__name__}._process_buy order: {order.id} executed "
+                            f"order quantity < best offer quantity"
+                        )
+                        break
+                else:
+                    logging.info(f"{__class__.__name__}._process_buy bid price < best offer, no transaction")
+                    order.quantity = remaining_quantity
+                    self._active_orders.append(order)
+                    self._active_buy_orders.append(order)
+                    break
+            else:
+                logging.info(f"{__class__.__name__}._process_buy no active sell orders, no transaction")
+                order.quantity = remaining_quantity
+                self._active_orders.append(order)
+                self._active_buy_orders.append(order)
+                break
+
+    def _process_sell(self, order: Order):
+        logging.info(f"{__class__.__name__}._process_sell {order}")
+        assert order.side.lower() == "sell"
+        assert order.market_id == self._market_id
+        market_id = order.market_id
+        remaining_quantity = order.quantity
+        while True:
+            if len(self._active_buy_orders) > 0:
+                buy_orders = sorted(self._active_buy_orders, key=operator.attrgetter("price"))
+                best_bid: Order = buy_orders[0]
+                if order.price >= best_bid.price:
+                    transaction_price = best_bid.price
+                    if remaining_quantity > best_bid.quantity:
+                        transaction_quantity = best_bid.quantity
+                        Transaction(best_bid, order, market_id, transaction_price, transaction_quantity)
+                        self._remove_bid(best_bid)
+                        remaining_quantity -= transaction_quantity
+                        self.logging.info(
+                            f"{__class__.__name__}._process_sell order: {order.id} "
+                            f"partial fill remaining quantity: {remaining_quantity}"
+                        )
+                        # Find next best offer
+                    elif remaining_quantity == best_bid.quantity:
+                        transaction_quantity = best_bid.quantity
+                        Transaction(best_bid, order, market_id, transaction_price, transaction_quantity)
+                        self._remove_bid(best_bid)
+                        self.logging.info(
+                            f"{__class__.__name__}._process_sell order: {order.id} executed "
+                            f"order quantity == offer quantity"
+                        )
+                        break
+                    else:
+                        transaction_quantity = remaining_quantity
+                        Transaction(best_bid, order, market_id, transaction_price, transaction_quantity)
+                        self._reduce_bid(best_bid, transaction_quantity)
+                        self.logging.info(
+                            f"{__class__.__name__}._process_sell order: {order.id} executed "
+                            f"order quantity < best bid quantity"
+                        )
+                        break
+                else:
+                    logging.info(f"{__class__.__name__}._process_sell offer price > best bid, no transaction")
+                    order.quantity = remaining_quantity
+                    self._active_orders.append(order)
+                    self._active_buy_orders.append(order)
+                    break
+            else:
+                logging.info(f"{__class__.__name__}._process_sell no active buy orders, no transaction")
+                order.quantity = remaining_quantity
+                self._active_orders.append(order)
+                self._active_sell_orders.append(order)
+                break
+
+    def _remove_offer(self, offer: Order):
+        for i, order in enumerate(self._active_sell_orders):
+            if order.id == offer.id:
+                logging.info(f"{__class__.__name__}._remove_offer order id: {offer.id}")
+                del self._active_sell_orders[i]
+                break
+
+    def _reduce_offer(self, offer: Order, transactionQuantity: int):
+        for i, order in enumerate(self._active_sell_orders):
+            if order.id == offer.id:
+                if self._active_sell_orders[i].quantity == transactionQuantity:
+                    self._remove_offer(offer)
+                else:
+                    self._active_orders[i].quantity -= transactionQuantity
+                break
+
+    def _remove_bid(self, bid: Order):
+        for i, order in enumerate(self._active_buy_orders):
+            if order.id == bid.id:
+                logging.info(f"{__class__.__name__}._remove_bid order id: {bid.id}")
+                del self._active_buy_orders[i]
+                break
+
+    def _reduce_bid(self, bid: Order, transactionQuantity: int):
+        for i, order in enumerate(self._active_buy_orders):
+            if order.id == bid.id:
+                if self._active_buy_orders[i].quantity == transactionQuantity:
+                    self._remove_bid(bid)
+                else:
+                    self._active_orders[i].quantity -= transactionQuantity
+                break
