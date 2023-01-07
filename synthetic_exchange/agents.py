@@ -28,6 +28,7 @@ class Agents:
     def add(self, agents):
         assert isinstance(agents, list)
         for agent in agents:
+            assert isinstance(agent, Agent)
             self._agents[agent.id] = agent
 
     def get(self, agentId: int) -> Agent:
@@ -69,3 +70,7 @@ class Agents:
 
     def on_cancel_event(self, *args, **kwargs):
         pass
+
+    def on_orderbook_event(self, event: dict):
+        for i, agent in self._agents.items():
+            agent.on_orderbook_event(event)

@@ -12,6 +12,7 @@ from synthetic_exchange.agent import Agent
 from synthetic_exchange.agents import Agents
 from synthetic_exchange.order import Order
 from synthetic_exchange.orderbook import OrderBook
+from synthetic_exchange.reports import Reports
 from synthetic_exchange.strategy import create_strategy
 from synthetic_exchange.transaction import Transaction
 
@@ -37,6 +38,7 @@ class Market:
         self._max_quantity = maxQuantity
         self._agents = Agents(self._id, symbol)
         self._orderbook = OrderBook(self._id, symbol)
+        self._reports = Reports(self._id)
 
         # Create agents
         self._agents = Agents(symbol=symbol, marketId=0)
@@ -56,6 +58,20 @@ class Market:
         self._agents.add([agent_1])
 
         __class__._markets[self._id] = self
+
+        self._orderbook.events.partial_fill.subscribe(__class__._orderbook_event)
+        self._orderbook.events.fill.subscribe(__class__._orderbook_event)
+        self._orderbook.events.cancel.subscribe(__class__._orderbook_event)
+
+    @staticmethod
+    def _orderbook_event(event: dict):
+        try:
+            market_id = event["_market_id"]
+            assert market_id is not None
+            assert market_id in __class__._markets
+            __class__._markets[market_id]._agents.on_orderbook_event(event)
+        except Exception as e:
+            logging.error(f"{__class__.__name__}._orderbook_event exception: {e}")
 
     @staticmethod
     def _order_event(order: dict):
@@ -144,7 +160,9 @@ class Market:
     def add_agents(self, agents: list):
         self._agents.add(agents)
 
-    def summary(self):
+    def show_transactions(self):
+        self._reports.show_transactions(self._orderbooks.transactions)
+        """
         df = pd.DataFrame(Transaction.history_list(self.id), columns=["id", "time", "price"])
         df["volatility"] = df["price"].rolling(7).std()
         df["volatilityTrend"] = df["volatility"].rolling(100).mean()
@@ -186,7 +204,9 @@ class Market:
 
         axs[1, 1].set_title("Running profit")
         return plt.show()
+        """
 
+    """
     def showOrderbook(self, show_depth=10):
         widthOrderbook = len("0       Bert    Buy     33      5")
         print(widthOrderbook * 2 * "*")
@@ -205,6 +225,10 @@ class Market:
 
         print(widthOrderbook * 2 * "*")
         print(" ")
+    """
+
+    def show_orderbook(self, depth: int = 10):
+        self._reports.show_orderbook(self._orderbook, depth)
 
     @staticmethod
     def get_max_price(marketId):
@@ -225,3 +249,13 @@ class Market:
         else:
             logging.error(f"{__class__.__name__}.get_last_price {marketId} not found")
         return retval
+
+    @staticmethod
+    def show_transactions_by_id(marketId):
+        assert marketId in __class__._markets
+        __class__._markets[marketId].show_transactions()
+
+    @staticmethod
+    def show_orderbook_by_id(marketId: int, depth: int = 10):
+        assert marketId in __class__._markets
+        __class__._markets[marketId].show_orderbook(depth)

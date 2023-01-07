@@ -18,6 +18,7 @@ class Order:
         self._side = kwargs.get("side")
         self._price = kwargs.get("price")  # round(price/market.tick_size) * market.tick_size
         self._quantity = kwargs.get("quantity")
+        self._remaining = self._quantity
 
     @property
     def id(self):
@@ -50,6 +51,14 @@ class Order:
     @quantity.setter
     def quantity(self, value):
         self._quantity = value
+
+    @property
+    def remaining(self) -> int:
+        return self._remaining
+
+    @remaining.setter
+    def remaining(self, value):
+        self._remaining = value
 
     """
     @staticmethod

@@ -1,9 +1,39 @@
+import enum
 import logging
 import multiprocessing as mp
 import operator
 
 from synthetic_exchange.order import Order
 from synthetic_exchange.transaction import Transaction
+from synthetic_exchange.utils.observer import Event
+
+
+class OrderEvent(enum.Enum):
+    PartialFill = 0
+    Fill = 1
+    Cancel = 2
+
+
+class OrderEvents:
+    def __init__(self):
+        self.partial_fill = Event()
+        self.fill = Event()
+        self.cancel = Event()
+
+    def on_partial_fill(self, order: Order):
+        data = {"event": "partial_fill"}
+        data.update(order.__dict__)
+        self.partial_fill.emit(data)
+
+    def on_fill(self, order: Order):
+        data = {"event": "fill"}
+        data.update(order.__dict__)
+        self.fill.emit(data)
+
+    def on_cancel(self, order: Order):
+        data = {"event": "cancel"}
+        data.update(order.__dict__)
+        self.cancel.emit(data)
 
 
 class OrderBook:
@@ -20,6 +50,7 @@ class OrderBook:
         self._lock = mp.Lock()
         self._condition = mp.Condition(self._lock)
         self._process = None
+        self._events = OrderEvents()
         logging.info(f"{__class__.__name__} created")
 
     @property
@@ -29,6 +60,18 @@ class OrderBook:
     @property
     def market_id(self):
         return self._market_id
+
+    @property
+    def active_buy_orders(self) -> list:
+        return self._active_buy_orders
+
+    @property
+    def active_sell_orders(self) -> list:
+        return self._active_sell_orders
+
+    @property
+    def events(self):
+        return self._events
 
     def start(self):
         self._process = mp.Process(target=self._do_work, args=())
@@ -95,28 +138,34 @@ class OrderBook:
                         Transaction(order, best_offer, market_id, transaction_price, transaction_quantity)
                         self._remove_offer(best_offer)
                         remaining_quantity -= transaction_quantity
-                        self.logging.info(
+                        logging.info(
                             f"{__class__.__name__}._process_buy order: {order.id} "
                             f"partial fill remaining quantity: {remaining_quantity}"
                         )
+                        order.remaining = remaining_quantity
+                        self._events.on_partial_fill(order)
                         # Find next best offer
                     elif remaining_quantity == best_offer.quantity:
                         transaction_quantity = best_offer.quantity
                         Transaction(order, best_offer, market_id, transaction_price, transaction_quantity)
                         self._remove_offer(best_offer)
-                        self.logging.info(
+                        logging.info(
                             f"{__class__.__name__}._process_buy order: {order.id} executed "
                             f"order quantity == offer quantity"
                         )
+                        order.remaining = 0
+                        self._events.on_fill(order)
                         break
                     else:
                         transaction_quantity = remaining_quantity
                         Transaction(order, best_offer, market_id, transaction_price, transaction_quantity)
                         self._reduce_offer(best_offer, transaction_quantity)
-                        self.logging.info(
+                        logging.info(
                             f"{__class__.__name__}._process_buy order: {order.id} executed "
                             f"order quantity < best offer quantity"
                         )
+                        order.remaining = 0
+                        self._events.on_fill(order)
                         break
                 else:
                     logging.info(f"{__class__.__name__}._process_buy bid price < best offer, no transaction")
@@ -148,28 +197,34 @@ class OrderBook:
                         Transaction(best_bid, order, market_id, transaction_price, transaction_quantity)
                         self._remove_bid(best_bid)
                         remaining_quantity -= transaction_quantity
-                        self.logging.info(
+                        logging.info(
                             f"{__class__.__name__}._process_sell order: {order.id} "
                             f"partial fill remaining quantity: {remaining_quantity}"
                         )
+                        order.remaining = remaining_quantity
+                        self._events.on_partial_fill(order)
                         # Find next best offer
                     elif remaining_quantity == best_bid.quantity:
                         transaction_quantity = best_bid.quantity
                         Transaction(best_bid, order, market_id, transaction_price, transaction_quantity)
                         self._remove_bid(best_bid)
-                        self.logging.info(
+                        logging.info(
                             f"{__class__.__name__}._process_sell order: {order.id} executed "
                             f"order quantity == offer quantity"
                         )
+                        order.remaining = 0
+                        self._events.on_fill(order)
                         break
                     else:
                         transaction_quantity = remaining_quantity
                         Transaction(best_bid, order, market_id, transaction_price, transaction_quantity)
                         self._reduce_bid(best_bid, transaction_quantity)
-                        self.logging.info(
+                        logging.info(
                             f"{__class__.__name__}._process_sell order: {order.id} executed "
                             f"order quantity < best bid quantity"
                         )
+                        order.remaining = 0
+                        self._events.on_fill(order)
                         break
                 else:
                     logging.info(f"{__class__.__name__}._process_sell offer price > best bid, no transaction")

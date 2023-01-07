@@ -1,6 +1,5 @@
 import itertools
-
-# from synthetic_exchange.transaction import Transaction
+import logging
 
 
 class Agent:
@@ -56,13 +55,5 @@ class Agent:
     def quantity_bought(self):
         return self._quantity_bought
 
-    """
-    @staticmethod
-    def get_last_price(marketId):
-        p = 0.0
-        if marketId in Transaction.history.keys():
-            p = Transaction.history[marketId][-1].price
-        # else:
-        #    p = (market.max_price - market.min_price) / 2
-        return p
-    """
+    def on_orderbook_event(self, event: dict):
+        logging.info(f"{__class__.__name__}.on_order_event {self._id}:{self._strategy.name} {event}")
