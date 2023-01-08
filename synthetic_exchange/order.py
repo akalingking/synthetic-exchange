@@ -1,74 +1,32 @@
 import datetime as dt
+import enum
 import itertools
 
 
 class Order:
-    _counter = itertools.count()
+    class State(enum.Enum):
+        Open = 0
+        PartialyFilled = 1
+        Filled = 2
+        Cancelled = 3
+        Failed = 4
 
-    # def __init__(self, marketId, agentId, symbol, side, price, quantity):
+    _id = itertools.count()
+
     def __init__(self, **kwargs):
-        self._id = next(__class__._counter)
-        self._market_id = kwargs.get("marketId")
-        self._agent_id = kwargs.get("agentId")
+        self.id = next(__class__._id)
+        self.state = __class__.State.Open
+        self.market_id = kwargs.get("marketId")
+        self.agent_id = kwargs.get("agentId")
         if "dateTime" in kwargs:
-            self._datetime = kwargs.get("dateTime")
+            self.datetime = kwargs.get("dateTime")
         else:
-            self._datetime = dt.datetime.utcnow()
-        self._symbol = kwargs.get("symbol")
-        self._side = kwargs.get("side")
-        self._price = kwargs.get("price")  # round(price/market.tick_size) * market.tick_size
-        self._quantity = kwargs.get("quantity")
-        self._remaining = self._quantity
+            self.datetime = dt.datetime.utcnow()
+        self.symbol = kwargs.get("symbol")
+        self.side = kwargs.get("side")
+        self.price = kwargs.get("price")
+        self.quantity = kwargs.get("quantity")
+        self.remaining = self.quantity
 
-    @property
-    def id(self):
-        return self._id
-
-    @property
-    def datetime(self):
-        return self._datetime
-
-    @property
-    def market_id(self):
-        return self._market_id
-
-    @property
-    def agemt_id(self):
-        return self._agent_id
-
-    @property
-    def price(self):
-        return self._price
-
-    @property
-    def side(self):
-        return self._side
-
-    @property
-    def quantity(self):
-        return self._quantity
-
-    @quantity.setter
-    def quantity(self, value):
-        self._quantity = value
-
-    @property
-    def remaining(self) -> int:
-        return self._remaining
-
-    @remaining.setter
-    def remaining(self, value):
-        self._remaining = value
-
-    """
-    @staticmethod
-    def from_dict(data: dict) -> Order:
-        retval = None
-        try:
-            retval = Order(
-                marketId=data["marketId"],
-                agentId=data["agentId"],
-        except Exception as e:
-            logging.error(f"{__class__.__name__}.from_dict e: {e}")
-        return retval
-    """
+    def __str__(self):
+        return str(self.__dict__)

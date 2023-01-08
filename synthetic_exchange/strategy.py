@@ -54,7 +54,7 @@ class Strategy(ABC):
         self._process.join()
 
     def _do_work(self):
-        logging.info(f"{self.__class__.__name__}.do_work start")
+        logging.info(f"{self.__class__.__name__}.do_work agent id: {self._agent_id} name: {self._name} starting..")
         while True:
             self._cond.acquire()
             self._cond.wait(timeout=self._timeout)
@@ -64,7 +64,7 @@ class Strategy(ABC):
             else:
                 self._cond.release()
                 break
-        logging.info(f"{self.__class__.__name__}.do_work stopped")
+        logging.info(f"{self.__class__.__name__}.do_work agent id: {self._agent_id} name: {self._name} stopped!")
 
     @abstractmethod
     def do_work(self):

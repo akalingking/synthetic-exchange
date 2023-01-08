@@ -22,14 +22,14 @@ class Market:
     Multiple markets can be chained to create multi-asset exchange.
     """
 
-    _counter = itertools.count()
+    _last_id = itertools.count()
     _markets = {}
 
     def __init__(self, symbol, minPrice=1, maxPrice=100, tickSize=1, minQuantity=1, maxQuantity=100):
         random.seed(100)
         np.random.seed(100)
         self._symbol = symbol
-        self._id = next(__class__._counter)
+        self._id = next(__class__._last_id)
         # self._transaction_counter = 0
         self._min_price = minPrice
         self._max_price = maxPrice
@@ -66,7 +66,8 @@ class Market:
     @staticmethod
     def _orderbook_event(event: dict):
         try:
-            market_id = event["_market_id"]
+            assert "market_id" in event
+            market_id = event["market_id"]
             assert market_id is not None
             assert market_id in __class__._markets
             __class__._markets[market_id]._agents.on_orderbook_event(event)
@@ -121,15 +122,6 @@ class Market:
     def min_quantity(self):
         return self._min_quantity
 
-    # @property
-    # def transaction_counter(self):
-    #    #return self._transaction_counter
-    #    return Transaction.transaction_counter
-
-    # @transaction_counter.setter
-    # def transaction_counter(self, value):
-    #    self._transaction_counter = value
-
     def start(self, n=1000, clearAt=10000):
         # c = 1
         """
@@ -162,70 +154,6 @@ class Market:
 
     def show_transactions(self):
         self._reports.show_transactions(self._orderbooks.transactions)
-        """
-        df = pd.DataFrame(Transaction.history_list(self.id), columns=["id", "time", "price"])
-        df["volatility"] = df["price"].rolling(7).std()
-        df["volatilityTrend"] = df["volatility"].rolling(100).mean()
-        df = df[["id", "price", "volatility", "volatilityTrend"]]
-        df = df.set_index("id")
-
-        dfPrice = df["price"]
-        dfVolatility = df[["volatility", "volatilityTrend"]]
-
-        # PLOT PRICE
-        fig, axs = plt.subplots(2, 2)
-        axs[0, 0].plot(dfPrice, label="price")
-        axs[0, 0].set_title("Price")
-        axs[0, 0].legend()
-        # PLOT VOLATILITY
-        axs[0, 1].plot(dfVolatility)
-        axs[0, 1].set_title("Volatility")
-        axs[0, 1].legend()
-        # PLOT RUNNING POSITIONS + RUNNING PROFITS AGENTS
-        for i, a in self._agents.agents.items():
-            right = pd.DataFrame(
-                Transaction.history_market_agent(self.id, a.name), columns=["id", a.name, str(a.name) + "RunningProfit"]
-            )
-            right = right.set_index("id")
-            right = right[a.name]
-            axs[1, 0].plot(right, label=str(a.name))
-        axs[1, 0].set_title("Positions")
-
-        if self._agents.size < 20:
-            axs[1, 0].legend()
-
-        for i, a in self._agents.agents.items():
-            right = pd.DataFrame(
-                Transaction.history_market_agent(self.id, a.name), columns=["id", a.name, str(a.name) + "RunningProfit"]
-            )
-            right = right.set_index("id")
-            right = right[str(a.name) + "RunningProfit"]
-            axs[1, 1].plot(right, label=str(a.name) + "RunningProfit")
-
-        axs[1, 1].set_title("Running profit")
-        return plt.show()
-        """
-
-    """
-    def showOrderbook(self, show_depth=10):
-        widthOrderbook = len("0       Bert    Buy     33      5")
-        print(widthOrderbook * 2 * "*")
-
-        if self.id in Order.active_sell_orders:
-            for sellOrder in sorted(Order.active_sell_orders[self.id], key=operator.attrgetter("price"), reverse=True)[
-                :show_depth
-            ]:
-                print(widthOrderbook * "." + " " + str(sellOrder))
-        if self.id in Order._active_buy_orders:
-            buy_orders = sorted(Order.active_buy_orders[self.id], key=operator.attrgetter("price"), reverse=True)[
-                :show_depth
-            ]
-            for buy_order in buy_orders:
-                print(str(buy_order) + " " + widthOrderbook * ".")
-
-        print(widthOrderbook * 2 * "*")
-        print(" ")
-    """
 
     def show_orderbook(self, depth: int = 10):
         self._reports.show_orderbook(self._orderbook, depth)

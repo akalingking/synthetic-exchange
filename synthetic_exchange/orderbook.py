@@ -202,6 +202,7 @@ class OrderBook:
                             f"partial fill remaining quantity: {remaining_quantity}"
                         )
                         order.remaining = remaining_quantity
+                        order.state = Order.State.PartialyFilled
                         self._events.on_partial_fill(order)
                         # Find next best offer
                     elif remaining_quantity == best_bid.quantity:
@@ -213,6 +214,7 @@ class OrderBook:
                             f"order quantity == offer quantity"
                         )
                         order.remaining = 0
+                        order.state = Order.State.Filled
                         self._events.on_fill(order)
                         break
                     else:
@@ -224,6 +226,7 @@ class OrderBook:
                             f"order quantity < best bid quantity"
                         )
                         order.remaining = 0
+                        order.state = Order.State.Filled
                         self._events.on_fill(order)
                         break
                 else:
