@@ -22,6 +22,10 @@ class Agents:
         return self._symbol
 
     @property
+    def agents(self):
+        return self._agents
+
+    @property
     def size(self):
         return len(self._agents)
 

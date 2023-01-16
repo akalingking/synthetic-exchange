@@ -11,13 +11,13 @@ class Agent:
         self.strategy = strategy
         self.strategy.agent_id = self.id
         self.params = params
-        self.position = {}
-        self.running_profit = {}
-        self.value_bought = {}
-        self.quantity_bought = {}
-        self.value_sold = {}
-        self.quantity_sold = {}
-        self.stop = {}
+        self.position = 0
+        self.running_profit = 0.0
+        self.value_bought = 0.0
+        self.quantity_bought = 0.0
+        self.value_sold = 0.0
+        self.quantity_sold = 0.0
+        # self.stop = {}
         print(f"{__class__.__name__}.__init__ adding {self.name}")
 
     def start(self):

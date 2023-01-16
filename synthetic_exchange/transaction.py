@@ -27,16 +27,16 @@ class Transaction:
 
     @staticmethod
     def calculate_profit(agent, marketId):
-        if agent.quantity_sold[marketId] > 0:
-            askVwap = agent.value_sold[marketId] / agent.quantity_sold[marketId]
+        if agent.quantity_sold > 0:
+            askVwap = agent.value_sold / agent.quantity_sold
         else:
             askVwap = 0
-        if agent.quantity_bought[marketId] > 0:
-            bidVwap = agent.value_bought[marketId] / agent.quantity_bought[marketId]
+        if agent.quantity_bought > 0:
+            bidVwap = agent.value_bought / agent.quantity_bought
         else:
             bidVwap = 0
 
-        q = min(agent.quantity_sold[marketId], agent.quantity_bought[marketId])
+        q = min(agent.quantity_sold, agent.quantity_bought)
         rp = q * (askVwap - bidVwap)
         return rp
 
@@ -48,12 +48,25 @@ class Transaction:
 
 class Transactions:
     def __init__(self, marketId, agents):
+        assert agents is not None
         self._market_id = marketId
         self._history = []
         self._history_list = []
         self._history_market_agent = {}
         self._transactions = {}
         self._agents = agents
+
+    @property
+    def agents(self):
+        return self._agents
+
+    @property
+    def transactions(self):
+        return self._transactions
+
+    @property
+    def size(self) -> int:
+        return len(self._transactions)
 
     def create(self, buyOrder, sellOrder, marketId, price, quantity) -> Transaction:
         buy_order_agent = self._agents.get(buyOrder.agent_id)
@@ -76,27 +89,28 @@ class Transactions:
         self._history_market_agent[buy_order_agent.id].append(
             [
                 transaction.id,
-                buy_order_agent.position[marketId],
+                buy_order_agent.position,
                 Transaction.calculate_profit(buy_order_agent, marketId),
             ]
         )
         self._history_market_agent[sell_order_agent.id].append(
             [
                 transaction.id,
-                sell_order_agent.position[marketId],
+                sell_order_agent.position,
                 Transaction.calculate_profit(sell_order_agent, marketId),
             ]
         )
 
-        buy_order_agent.position[marketId] += quantity
-        sell_order_agent.position[marketId] -= quantity
-        buy_order_agent.value_bought[marketId] += price * quantity
-        buy_order_agent.quantity_bought[marketId] += quantity
-        sell_order_agent.value_sold[marketId] += price * quantity
-        sell_order_agent.quantity_sold[marketId] += quantity
+        buy_order_agent.position += quantity
+        sell_order_agent.position -= quantity
+        buy_order_agent.value_bought += price * quantity
+        buy_order_agent.quantity_bought += quantity
+        sell_order_agent.value_sold += price * quantity
+        sell_order_agent.quantity_sold += quantity
 
         # Register transaction
         self._transactions[transaction.id] = transaction
+        logging.info(f"{__class__.__name__}.create {transaction} size: {len(self._transactions)}")
         return transaction
 
     def remove(self, transactionId):
@@ -105,25 +119,25 @@ class Transactions:
         else:
             logging.error(f"{__class__.__name__}.remove id: {transactionId} not found")
 
+    @property
     def history(self):
         return self._history
 
-    def history_list(self, marketId):
-        retval = []
-        if marketId in self._history_list:
-            retval = self._history_list[marketId]
-        else:
-            logging.info(f"{__class__.__name__}.history_list market id: {marketId}")
-        return retval
+    @property
+    def history_list(self):
+        return self._history_list
 
-    def history_market_agent(self, marketId, agentName):
+    def history_market_agent(self, agentId, agentName) -> list:
         retval = []
-        if marketId in self._history_market_agent:
-            agents = self._history_market_agent[marketId]
-            if agentName in agents:
-                retval = agents[agentName]
+        if len(self._history_market_agent) > 0:
+            if agentId in self._history_market_agent:
+                agents = self._history_market_agent[agentId]
+                if agentName in agents:
+                    retval = agents[agentName]
+                else:
+                    logging.info(f"{__class__.__name__}.history_market_agent missing agent: {agentName}")
             else:
-                logging.info(f"{__class__.__name__}.history_market_agent missing agent: {agentName}")
+                logging.info(f"{__class__.__name__}.history_market_agent missing agent id: {agentId}")
         else:
-            logging.info(f"{__class__.__name__}.history_market_agent missing market id: {marketId}")
+            logging.warning(f"{__class__.__name__}.history_market_agent empty history market agent")
         return retval

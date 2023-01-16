@@ -14,7 +14,7 @@ from synthetic_exchange.order import Order
 from synthetic_exchange.orderbook import OrderBook
 from synthetic_exchange.reports import Reports
 from synthetic_exchange.strategy import create_strategy
-from synthetic_exchange.transaction import Transaction
+from synthetic_exchange.transaction import Transaction, Transactions
 
 
 class Market:
@@ -30,14 +30,12 @@ class Market:
         np.random.seed(100)
         self._symbol = symbol
         self._id = next(__class__._last_id)
-        # self._transaction_counter = 0
         self._min_price = minPrice
         self._max_price = maxPrice
         self._tick_size = tickSize
         self._min_quantity = minQuantity
         self._max_quantity = maxQuantity
         self._agents = Agents(self._id, symbol)
-        self._orderbook = OrderBook(self._id, symbol)
         self._reports = Reports(self._id)
 
         # Create agents
@@ -58,7 +56,9 @@ class Market:
         self._agents.add([agent_1])
 
         __class__._markets[self._id] = self
+        self._transactions = Transactions(self._id, self._agents)
 
+        self._orderbook = OrderBook(self._id, symbol, self._transactions)
         self._orderbook.events.partial_fill.subscribe(__class__._orderbook_event)
         self._orderbook.events.fill.subscribe(__class__._orderbook_event)
         self._orderbook.events.cancel.subscribe(__class__._orderbook_event)
@@ -95,8 +95,20 @@ class Market:
         self._orderbook.process(order)
 
     @property
+    def reports(self):
+        return self._reports
+
+    @property
+    def transactions(self):
+        return self._transactions
+
+    @property
     def agents(self):
         return self._agents
+
+    @property
+    def orderbook(self):
+        return self._orderbook
 
     @property
     def id(self):
@@ -153,7 +165,10 @@ class Market:
         self._agents.add(agents)
 
     def show_transactions(self):
-        self._reports.show_transactions(self._orderbooks.transactions)
+        assert self._transactions is not None
+        assert self._transactions.size > 0
+        assert self._orderbook.transactions.size > 0
+        self._reports.show_transactions(self._orderbook.transactions)
 
     def show_orderbook(self, depth: int = 10):
         self._reports.show_orderbook(self._orderbook, depth)

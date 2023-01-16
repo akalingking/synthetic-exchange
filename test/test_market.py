@@ -28,8 +28,14 @@ class MarketTest(unittest.TestCase):
     def test_market(self):
         print(f"{__class__.__name__}.test_market")
         self._market.start()
-        time.sleep(50)
+        time.sleep(30)
         self._market.stop()
+        assert self._market.transactions is not None
+        assert self._market.transactions.agents is not None
+        assert self._market.transactions.agents.agents is not None
+        assert self._market.orderbook.transactions.size > 0
+        self._market.show_transactions()
+        # self._market.show_orderbook()
 
 
 if __name__ == "__main__":
