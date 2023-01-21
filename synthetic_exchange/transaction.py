@@ -1,6 +1,7 @@
 import datetime as dt
 import itertools
 import logging
+import multiprocessing as mp
 
 from synthetic_exchange import classproperty
 from synthetic_exchange.order import Order
@@ -24,6 +25,9 @@ class Transaction:
 
     def __str__(self):
         return str(self.__dict__)
+
+    def __repr__(self):
+        return self.__str__()
 
     @staticmethod
     def calculate_profit(agent, marketId):
@@ -50,10 +54,10 @@ class Transactions:
     def __init__(self, marketId, agents):
         assert agents is not None
         self._market_id = marketId
-        self._history = []
-        self._history_list = []
-        self._history_market_agent = {}
-        self._transactions = {}
+        self._history = mp.Manager().list()
+        self._history_list = mp.Manager().list()
+        self._history_market_agent = mp.Manager().dict()
+        self._transactions = mp.Manager().dict()
         self._agents = agents
 
     @property

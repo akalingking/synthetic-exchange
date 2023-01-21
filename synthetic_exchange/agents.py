@@ -6,7 +6,7 @@ from synthetic_exchange.agent import Agent
 from synthetic_exchange.utils.observer import Event
 
 
-class Agents:
+class Agents(object):
     def __init__(self, marketId: int, symbol: str):
         self._market_id = marketId
         self._symbol = symbol

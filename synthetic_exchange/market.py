@@ -135,27 +135,12 @@ class Market:
         return self._min_quantity
 
     def start(self, n=1000, clearAt=10000):
-        # c = 1
-        """
-        for o in range(n):
-            for i, agent in self._agents.agents.items():
-                if self._id in Transaction.history:
-                    last_transaction_id = Transaction.history[self._id][-1].id
-                else:
-                    self._strategies.add(self._id, agent.id, agent.strategy)
-        """
-
-        # c += 1
-        # if c % clearAt == 0:
-        #    self.clear()
         self._agents.start()
-        logging.info(">>>agents started")
         self._orderbook.start()
-        logging.info(">>>orderbook started")
 
     def stop(self):
-        self._agents.stop()
         self._orderbook.stop()
+        self._agents.stop()
 
     def clear(self):
         Order.active_buy_orders[self._id] = []
@@ -173,6 +158,14 @@ class Market:
     def show_orderbook(self, depth: int = 10):
         self._reports.show_orderbook(self._orderbook, depth)
 
+    def get_last_price(self):
+        retval = None
+        if len(self._transactions.history) > 0:
+            retval = self._transactions.history[-1].price
+        else:
+            retval = self._max_price - self._min_price / 2.0
+        return retval
+
     @staticmethod
     def get_max_price(marketId):
         retval = None
@@ -180,6 +173,7 @@ class Market:
             retval = __class__._markets[marketId].max_price
         return retval
 
+    """
     @staticmethod
     def get_last_price(marketId):
         retval = None
@@ -192,6 +186,7 @@ class Market:
         else:
             logging.error(f"{__class__.__name__}.get_last_price {marketId} not found")
         return retval
+    """
 
     @staticmethod
     def show_transactions_by_id(marketId):

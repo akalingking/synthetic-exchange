@@ -13,15 +13,15 @@ from synthetic_exchange.order import Order
 from synthetic_exchange.utils.observer import Event
 
 
-class Strategy(ABC):
+class Strategy(ABC, mp.Process):
     def __init__(self):
         self._order_event = Event()
         self._lock = mp.Lock()
         self._cond = mp.Condition(self._lock)
-        self._process = None
         self._timeout = 3
         self._stop = mp.Event()
         self._agent_id = 0
+        mp.Process.__init__(self)
 
     @property
     def order_event(self):
@@ -40,18 +40,19 @@ class Strategy(ABC):
         self._agent_id = value
 
     def start(self):
-        self._process = mp.Process(target=__class__._do_work, args=(self,))
-        self._process.start()
+        mp.Process.start(self)
 
     def wait(self):
-        self._process.join()
+        mp.Process.join(self)
 
     def stop(self):
         self._lock.acquire()
         self._stop.set()
         self._cond.notify()
         self._lock.release()
-        self._process.join()
+
+    def run(self):
+        self._do_work()
 
     def _do_work(self):
         logging.info(f"{self.__class__.__name__}.do_work agent id: {self._agent_id} name: {self._name} starting..")

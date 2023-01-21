@@ -2,12 +2,18 @@ import logging
 import operator
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
 from synthetic_exchange.agent import Agent
 from synthetic_exchange.agents import Agents
 from synthetic_exchange.orderbook import OrderBook
 from synthetic_exchange.transaction import Transaction, Transactions
+
+
+class _Config:
+    vol_period = 7
+    trend_period = 100
 
 
 class Reports:
@@ -21,9 +27,10 @@ class Reports:
             logging.warning(f"{__class__.__name__}.show_transactions no history")
             return
 
-        df = pd.DataFrame(transactions.history_list, columns=["id", "time", "price"])
-        df["volatility"] = df["price"].rolling(7).std()
-        df["volatilityTrend"] = df["volatility"].rolling(100).mean()
+        data = np.array(transactions.history_list)
+        df = pd.DataFrame(data, columns=["id", "time", "price"])
+        df["volatility"] = df["price"].rolling(_Config.vol_period).std()
+        df["volatilityTrend"] = df["volatility"].rolling(_Config.trend_period).mean()
         df = df[["id", "price", "volatility", "volatilityTrend"]]
         df = df.set_index("id")
 

@@ -2,7 +2,6 @@ import enum
 import logging
 import multiprocessing as mp
 import operator
-from multiprocessing.managers import BaseManager
 
 from synthetic_exchange.order import Order
 from synthetic_exchange.transaction import Transaction, Transactions
@@ -37,11 +36,7 @@ class OrderEvents:
         self.cancel.emit(data)
 
 
-class MyManager(BaseManager):
-    pass
-
-
-class OrderBook:
+class OrderBook(mp.Process):
     def __init__(self, marketId: int, symbol: str, transactions: Transactions = None):
         self._market_id = marketId
         self._symbol = symbol
@@ -54,10 +49,9 @@ class OrderBook:
         self._stop = mp.Event()
         self._lock = mp.Lock()
         self._condition = mp.Condition(self._lock)
-        self._process = None
         self._events = OrderEvents()
         self._transactions = transactions
-        logging.info(f"{__class__.__name__} created")
+        mp.Process.__init__(self)
 
     @property
     def symbol(self):
@@ -84,12 +78,10 @@ class OrderBook:
         return self._events
 
     def start(self):
-        self._process = mp.Process(target=self._do_work, args=(self._transactions,))
-        self._process.start()
+        mp.Process.start(self)
 
     def wait(self):
-        if self._process is not None and self._stop.is_set():
-            self._process.join()
+        mp.Process.wait(self)
 
     def stop(self):
         self._condition.acquire()
@@ -104,7 +96,10 @@ class OrderBook:
         self._condition.notify()
         self._lock.release()
 
-    def _do_work(self, transactions: Transactions):
+    def run(self):
+        self._do_work()
+
+    def _do_work(self):
         logging.info(f"{__class__.__name__}._do_work start")
         while True:
             self._condition.acquire()
@@ -126,9 +121,9 @@ class OrderBook:
                     "quantity": order.quantity,
                 }
                 if order.side.lower() == "buy":
-                    self._process_buy(order, transactions)
+                    self._process_buy(order, self._transactions)
                 elif order.side.lower() == "sell":
-                    self._process_sell(order, transactions)
+                    self._process_sell(order, self._transactions)
                 else:
                     logging.error(f"{__class__.__name__}._do_work invalid order side: {order.side}")
         logging.info(f"{__class__.__name__}._do_work stopped")

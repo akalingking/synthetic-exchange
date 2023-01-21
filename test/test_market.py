@@ -35,7 +35,7 @@ class MarketTest(unittest.TestCase):
         assert self._market.transactions.agents.agents is not None
         assert self._market.orderbook.transactions.size > 0
         self._market.show_transactions()
-        # self._market.show_orderbook()
+        self._market.show_orderbook()
 
 
 if __name__ == "__main__":
