@@ -134,8 +134,11 @@ class OrderBook(mp.Process):
         market_id = order.market_id
         remaining_quantity = order.quantity
         while True:
-            if len(self._active_sell_orders) > 0:
-                sell_orders = sorted(self._active_sell_orders, key=operator.attrgetter("price"))
+            active_sell_orders = [item for item in self._active_sell_orders if item.agent_id != order.agent_id]
+            if len(active_sell_orders) > 0:
+                # todo: sell_orders = self._active_sell_orders
+                # sell_orders = sorted(self._active_sell_orders, key=operator.attrgetter("price"))
+                sell_orders = sorted(active_sell_orders, key=operator.attrgetter("price"))
                 best_offer: Order = sell_orders[0]
                 if order.price >= best_offer.price:
                     transaction_price = best_offer.price
@@ -199,8 +202,9 @@ class OrderBook(mp.Process):
         market_id = order.market_id
         remaining_quantity = order.quantity
         while True:
-            if len(self._active_buy_orders) > 0:
-                buy_orders = sorted(self._active_buy_orders, key=operator.attrgetter("price"))
+            active_buy_orders = [item for item in self._active_buy_orders if item.agent_id != order.agent_id]
+            if len(active_buy_orders) > 0:
+                buy_orders = sorted(active_buy_orders, key=operator.attrgetter("price"))
                 best_bid: Order = buy_orders[0]
                 if order.price >= best_bid.price:
                     transaction_price = best_bid.price

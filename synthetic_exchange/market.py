@@ -1,7 +1,9 @@
 import itertools
 import logging
+import multiprocessing as mp
 import operator
 import random
+from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -40,6 +42,7 @@ class Market:
 
         # Create agents
         self._agents = Agents(symbol=symbol, marketId=0)
+        agents = []
         agent_1 = Agent(
             create_strategy(
                 name="RandomUniform",
@@ -53,7 +56,8 @@ class Market:
                 handler=__class__._order_event,
             )
         )
-        self._agents.add([agent_1])
+        agents.append(agent_1)
+        self._agents.add(agents)
 
         __class__._markets[self._id] = self
         self._transactions = Transactions(self._id, self._agents)
@@ -111,6 +115,10 @@ class Market:
         return self._orderbook
 
     @property
+    def symbol(self):
+        return self._symbol
+
+    @property
     def id(self):
         return self._id
 
@@ -135,6 +143,7 @@ class Market:
         return self._min_quantity
 
     def start(self, n=1000, clearAt=10000):
+        assert self._agents.size > 0
         self._agents.start()
         self._orderbook.start()
 
@@ -146,8 +155,10 @@ class Market:
         Order.active_buy_orders[self._id] = []
         Order.active_sell_orders[self._id] = []
 
-    def add_agents(self, agents: list):
+    def add_agents(self, agents: List[Agent]):
         self._agents.add(agents)
+        # self._transactions.agents = self._agents
+        # self._transactions = Transactions(self._id, self._agents)
 
     def show_transactions(self):
         assert self._transactions is not None

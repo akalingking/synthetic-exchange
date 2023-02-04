@@ -1,17 +1,20 @@
 import logging
+import multiprocessing as mp
 import time
-from multiprocessing import Process
+from typing import List
 
 from synthetic_exchange.agent import Agent
 from synthetic_exchange.utils.observer import Event
 
 
-class Agents(object):
+class Agents:
     def __init__(self, marketId: int, symbol: str):
         self._market_id = marketId
         self._symbol = symbol
-        self._agents = {}
+        self._agents = mp.Manager().dict()
+        # self._agents = {}
         self._order_event = Event()
+        # mp.Process.__init__(self)
 
     @property
     def market_id(self):
@@ -29,11 +32,13 @@ class Agents(object):
     def size(self):
         return len(self._agents)
 
-    def add(self, agents):
+    def add(self, agents: List[Agent]):
         assert isinstance(agents, list)
-        for agent in agents:
-            assert isinstance(agent, Agent)
-            self._agents[agent.id] = agent
+        # for agent in agents:
+        #    assert isinstance(agent, Agent)
+        #    self._agents[agent.id] = agent
+        agents_ = {item.id: item for item in agents + self._agents.values()}
+        self._agents = agents_
 
     def get(self, agentId: int) -> Agent:
         retval = None
@@ -46,6 +51,7 @@ class Agents(object):
     def start(self):
         print(f"{__class__.__name__}.start entry")
         self._do_work()
+        # mp.Process.start(self)
         print(f"{__class__.__name__}.start exit")
 
     def stop(self):
@@ -53,6 +59,7 @@ class Agents(object):
         for i, agent in self._agents.items():
             agent.strategy.stop()
         self.wait()
+        # mp.Process.wait(self)
 
     def wait(self):
         for i, agent in self._agents.items():
@@ -63,6 +70,7 @@ class Agents(object):
         print(f"on_order_event order: {order}")
 
     def _do_work(self):
+        # def run(self):
         for i, agent in self._agents.items():
             agent.start()
 

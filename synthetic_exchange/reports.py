@@ -60,7 +60,10 @@ class Reports:
         assert isinstance(transactions.agents, Agents)
         assert isinstance(transactions.agents.agents, dict)
         assert len(transactions.agents.agents) > 0
+
+        print(f"{__class__.__name__}.show_transactions history_market_agent: {transactions.history_market_agent}")
         for i, a in transactions.agents.agents.items():
+            # data = transactions.history_market_agent(a.id, a.name)
             data = transactions.history_market_agent(a.id, a.name)
             if len(data) > 0:
                 right = pd.DataFrame(data, columns=["id", a.name, str(a.name) + "RunningProfit"])

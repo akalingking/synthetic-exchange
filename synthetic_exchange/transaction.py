@@ -64,6 +64,10 @@ class Transactions:
     def agents(self):
         return self._agents
 
+    @agents.setter
+    def agents(self, value):
+        self._agents = value
+
     @property
     def transactions(self):
         return self._transactions
@@ -81,29 +85,37 @@ class Transactions:
         transaction = Transaction(buyOrder, sellOrder, marketId, price, quantity)
 
         # Register order agents
+        print(
+            f">>>history_market_agent: {self._history_market_agent} bid: {buyOrder.agent_id} sid: {sellOrder.agent_id}"
+        )
         if buyOrder.agent_id not in self._history_market_agent:
             self._history_market_agent[buyOrder.agent_id] = []
         if sellOrder.agent_id not in self._history_market_agent:
             self._history_market_agent[sellOrder.agent_id] = []
+        assert len(self._history_market_agent) > 0
 
         # Record history
         self._history.append(transaction)
         self._history_list.append([transaction.id, transaction.datetime.time(), transaction.price])
-
-        self._history_market_agent[buy_order_agent.id].append(
+        buy_history = [
             [
                 transaction.id,
                 buy_order_agent.position,
                 Transaction.calculate_profit(buy_order_agent, marketId),
-            ]
-        )
-        self._history_market_agent[sell_order_agent.id].append(
+            ],
+        ]
+        assert buyOrder.agent_id in self._history_market_agent
+        self._history_market_agent[buyOrder.agent_id].append(buy_history)
+        self._history_market_agent[buyOrder.agent_id] += buy_history
+        sell_history = [
             [
                 transaction.id,
                 sell_order_agent.position,
                 Transaction.calculate_profit(sell_order_agent, marketId),
-            ]
-        )
+            ],
+        ]
+        assert sellOrder.agent_id in self._history_market_agent
+        self._history_market_agent[sellOrder.agent_id] += sell_history
 
         buy_order_agent.position += quantity
         sell_order_agent.position -= quantity

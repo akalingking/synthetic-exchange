@@ -2,7 +2,9 @@ import logging
 import time
 import unittest
 
+from synthetic_exchange.agent import Agent
 from synthetic_exchange.market import Market
+from synthetic_exchange.strategy import create_strategy
 
 
 class MarketTest(unittest.TestCase):
@@ -10,6 +12,24 @@ class MarketTest(unittest.TestCase):
     def setUpClass(cls):
         symbol = "SQNC-RSCH"
         cls._market = Market(symbol=symbol, minPrice=100, maxPrice=200, tickSize=1, minQuantity=25, maxQuantity=50)
+        """
+        agents = []
+        agent_1 = Agent(
+            create_strategy(
+                name="RandomUniform",
+                minPrice=100,
+                maxPrice=150,
+                tickSize=1,
+                minQuantity=10,
+                maxQuantity=25,
+                marketId=cls._market.id,
+                symbol=symbol,
+                handler=__class__._order_event,
+            )
+        )
+        agents.append(agent_1)
+        cls._market.add_agents(agents)
+        """
 
     @classmethod
     def tearDownClass(cls):
@@ -27,8 +47,27 @@ class MarketTest(unittest.TestCase):
 
     def test_market(self):
         print(f"{__class__.__name__}.test_market")
+        """
+        agents = []
+        agent_1 = Agent(
+            create_strategy(
+                name="RandomUniform",
+                minPrice=100,
+                maxPrice=150,
+                tickSize=1,
+                minQuantity=10,
+                maxQuantity=25,
+                marketId=self._market.id,
+                symbol=self._market.symbol,
+                handler=__class__._order_event,
+            )
+        )
+        agents.append(agent_1)
+        self._market.add_agents(agents)
+        """
+
         self._market.start()
-        time.sleep(30)
+        time.sleep(60 * 1)
         self._market.stop()
         assert self._market.transactions is not None
         assert self._market.transactions.agents is not None
