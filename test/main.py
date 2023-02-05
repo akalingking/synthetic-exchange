@@ -3,13 +3,15 @@ import unittest as ut
 from test.test_agents import AgentsTest
 from test.test_market import MarketTest
 
+import matplotlib.pyplot as plt
+
 
 def main():
     loader = ut.TestLoader()
     tests = [
         loader.loadTestsFromTestCase(test)
         for test in [
-            # AgentsTest,
+            AgentsTest,
             MarketTest,
         ]
     ]
@@ -20,4 +22,5 @@ def main():
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
+    plt.set_loglevel("info")
     main()

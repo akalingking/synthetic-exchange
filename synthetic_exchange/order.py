@@ -33,9 +33,9 @@ class Order:
     def __str__(self):
         retval = {}
         for k, v in self.__dict__.items():
-            if k == "state":
+            if k.lower() == "state":
                 retval[k] = v.name
-            elif k == "datetime":
+            elif k.lower() == "datetime":
                 retval[k] = v.isoformat()
             else:
                 retval[k] = v

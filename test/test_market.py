@@ -4,6 +4,7 @@ import unittest
 
 from synthetic_exchange.agent import Agent
 from synthetic_exchange.market import Market
+from synthetic_exchange.order import Order
 from synthetic_exchange.strategy import create_strategy
 
 
@@ -42,11 +43,11 @@ class MarketTest(unittest.TestCase):
         pass
 
     @staticmethod
-    def _order_event(order):
-        print(f"{__class__.__name__}._order_event order: {order}")
+    def _order_event(order: Order):
+        logging.info(f"{__class__.__name__}._order_event order: {order}")
 
     def test_market(self):
-        print(f"{__class__.__name__}.test_market")
+        logging.info(f"{__class__.__name__}.test_market")
         """
         agents = []
         agent_1 = Agent(

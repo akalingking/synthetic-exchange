@@ -4,6 +4,7 @@ import unittest
 
 from synthetic_exchange.agent import Agent
 from synthetic_exchange.agents import Agents
+from synthetic_exchange.order import Order
 from synthetic_exchange.strategy import RandomNormal, RandomUniform
 
 
@@ -28,11 +29,11 @@ class AgentsTest(unittest.TestCase):
         pass
 
     @staticmethod
-    def _order_event(order):
-        print(f"{__class__.__name__}._order_event order: {order}")
+    def _order_event(order: Order):
+        logging.info(f"---{__class__.__name__}._order_event order: {order}")
 
     def test_add_agent(self):
-        print(f"{__class__.__name__}.test_add_agent")
+        logging.info(f"---{__class__.__name__}.test_add_agent")
         self.assertTrue(self._agents.size > 0)
         self._agents.start()
         time.sleep(10)

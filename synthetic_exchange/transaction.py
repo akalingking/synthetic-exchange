@@ -24,7 +24,13 @@ class Transaction:
         self.quantity = quantity
 
     def __str__(self):
-        return str(self.__dict__)
+        retval = {}
+        for k, v in self.__dict__.items():
+            if k.lower() == "datetime":
+                retval[k] = v.isoformat()
+            else:
+                retval[k] = v
+        return str(retval)
 
     def __repr__(self):
         return self.__str__()
@@ -85,8 +91,9 @@ class Transactions:
         transaction = Transaction(buyOrder, sellOrder, marketId, price, quantity)
 
         # Register order agents
-        print(
-            f">>>history_market_agent: {self._history_market_agent} bid: {buyOrder.agent_id} sid: {sellOrder.agent_id}"
+        logging.info(
+            f"{__class__.__name__}.create history: {self._history_market_agent} "
+            f"bid: {buyOrder.agent_id} sid: {sellOrder.agent_id}"
         )
         if buyOrder.agent_id not in self._history_market_agent:
             self._history_market_agent[buyOrder.agent_id] = []
