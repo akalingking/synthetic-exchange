@@ -20,9 +20,7 @@ from synthetic_exchange.transaction import Transaction, Transactions
 
 
 class Market:
-    """Synthetic exchange generating orderbook for one instrument.
-    Multiple markets can be chained to create multi-asset exchange.
-    """
+    """Synthetic exchange generating orderbook for one instrument."""
 
     _last_id = itertools.count()
     _markets = {}
@@ -37,11 +35,11 @@ class Market:
         self._tick_size = tickSize
         self._min_quantity = minQuantity
         self._max_quantity = maxQuantity
-        self._agents = Agents(self._id, symbol)
         self._reports = Reports(self._id)
+        __class__._markets[self._id] = self
 
-        # Create agents
-        self._agents = Agents(symbol=symbol, marketId=0)
+    def _create_agents(self):
+        self._agents = Agents(symbol=self._symbol, marketId=0)
         agents = []
         agent_1 = Agent(
             create_strategy(
@@ -52,20 +50,26 @@ class Market:
                 minQuantity=10,
                 maxQuantity=25,
                 marketId=self._id,
-                symbol=symbol,
+                symbol=self._symbol,
                 handler=__class__._order_event,
             )
         )
         agents.append(agent_1)
+        agent_2 = Agent(
+            create_strategy(
+                name="RandomUniform",
+                minPrice=100,
+                maxPrice=150,
+                tickSize=1,
+                minQuantity=10,
+                maxQuantity=25,
+                marketId=self._id,
+                symbol=self._symbol,
+                handler=__class__._order_event,
+            )
+        )
+        agents.append(agent_2)
         self._agents.add(agents)
-
-        __class__._markets[self._id] = self
-        self._transactions = Transactions(self._id, self._agents)
-
-        self._orderbook = OrderBook(self._id, symbol, self._transactions)
-        self._orderbook.events.partial_fill.subscribe(__class__._orderbook_event)
-        self._orderbook.events.fill.subscribe(__class__._orderbook_event)
-        self._orderbook.events.cancel.subscribe(__class__._orderbook_event)
 
     @staticmethod
     def _orderbook_event(event: dict):
@@ -80,7 +84,7 @@ class Market:
 
     @staticmethod
     def _order_event(order: dict):
-        print(f"{__class__.__name__}._order_event: {order}")
+        logging.info(f"{__class__.__name__}._order_event: {order}")
         assert isinstance(order, dict)
         if "marketId" in order:
             market_id = order.get("marketId")
@@ -106,13 +110,8 @@ class Market:
     def transactions(self):
         return self._transactions
 
-    @property
-    def agents(self):
-        return self._agents
-
-    @property
-    def orderbook(self):
-        return self._orderbook
+    def orderbook(self, depth: int = -1) -> dict:
+        return self._orderbook.orderbook(depth)
 
     @property
     def symbol(self):
@@ -143,7 +142,13 @@ class Market:
         return self._min_quantity
 
     def start(self, n=1000, clearAt=10000):
+        self._create_agents()
         assert self._agents.size > 0
+        self._transactions = Transactions(self._id, self._agents)
+        self._orderbook = OrderBook(self._id, self._symbol, self._transactions)
+        self._orderbook.events.partial_fill.subscribe(__class__._orderbook_event)
+        self._orderbook.events.fill.subscribe(__class__._orderbook_event)
+        self._orderbook.events.cancel.subscribe(__class__._orderbook_event)
         self._agents.start()
         self._orderbook.start()
 
@@ -157,8 +162,6 @@ class Market:
 
     def add_agents(self, agents: List[Agent]):
         self._agents.add(agents)
-        # self._transactions.agents = self._agents
-        # self._transactions = Transactions(self._id, self._agents)
 
     def show_transactions(self):
         assert self._transactions is not None
@@ -177,34 +180,36 @@ class Market:
             retval = self._max_price - self._min_price / 2.0
         return retval
 
-    @staticmethod
-    def get_max_price(marketId):
-        retval = None
-        if marketId in __class__._markets:
-            retval = __class__._markets[marketId].max_price
+    def get_buy_price(self) -> float:
+        retval = 0.0
+        orders = self._orderbook.buy_orders()
+        if len(orders) > 0:
+            retval = orders[0].price
         return retval
 
-    """
-    @staticmethod
-    def get_last_price(marketId):
-        retval = None
-        if marketId in __class__._markets:
-            if marketId in Transaction.history:
-                retval = Transaction.history[marketId][-1].price
-            else:
-                market = __class__._markets[marketId]
-                retval = (market.max_price - market.min_price) / 2
-        else:
-            logging.error(f"{__class__.__name__}.get_last_price {marketId} not found")
+    def get_sell_price(self) -> float:
+        retval = 0.0
+        orders = self._orderbook.sell_orders()
+        if len(orders) > 0:
+            retval = orders[0].price
         return retval
-    """
 
-    @staticmethod
-    def show_transactions_by_id(marketId):
-        assert marketId in __class__._markets
-        __class__._markets[marketId].show_transactions()
+    def get_spread(self) -> float:
+        retval = 0.0
+        sell_price = self.get_sell_price()
+        buy_price = self.get_buy_price()
+        if sell_price > 0 and buy_price > 0.0:
+            retval = sell_price - buy_price
+        return retval
 
-    @staticmethod
-    def show_orderbook_by_id(marketId: int, depth: int = 10):
-        assert marketId in __class__._markets
-        __class__._markets[marketId].show_orderbook(depth)
+    def get_mid_price(self) -> float:
+        retval = None
+        sell_price = self.get_sell_price()
+        buy_price = self.get_buy_price()
+        if sell_price > 0.0 and buy_price > 0.0:
+            retval = (sell_price + buy_price) / 2.0
+        elif sell_price > 0.0 and buy_price <= 0.0:
+            retval = sell_price
+        elif sell_price <= 0.0 and buy_price > 0.0:
+            retval = buy_price
+        return retval

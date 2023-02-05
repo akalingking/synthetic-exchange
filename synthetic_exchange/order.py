@@ -1,6 +1,7 @@
 import datetime as dt
 import enum
 import itertools
+import json
 import multiprocessing as mp
 
 
@@ -30,7 +31,15 @@ class Order:
         self.remaining = self.quantity
 
     def __str__(self):
-        return str(self.__dict__)
+        retval = {}
+        for k, v in self.__dict__.items():
+            if k == "state":
+                retval[k] = v.name
+            elif k == "datetime":
+                retval[k] = v.isoformat()
+            else:
+                retval[k] = v
+        return str(retval)
 
     def __repr__(self):
         return self.__str__()

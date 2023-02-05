@@ -17,7 +17,6 @@ class Agent:
         self.quantity_bought = 0.0
         self.value_sold = 0.0
         self.quantity_sold = 0.0
-        # self.stop = {}
         print(f"{__class__.__name__}.__init__ adding {self.name}")
 
     def start(self):

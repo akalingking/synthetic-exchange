@@ -39,22 +39,26 @@ class Strategy(ABC, mp.Process):
     def agent_id(self, value: int):
         self._agent_id = value
 
-    def start(self):
-        mp.Process.start(self)
+    # def start(self):
+    #    mp.Process.start(self)
 
     def wait(self):
         mp.Process.join(self)
 
-    def stop(self):
+    def terminate(self):
         self._lock.acquire()
         self._stop.set()
         self._cond.notify()
         self._lock.release()
+        mp.Process.terminate(self)
+
+    def stop(self):
+        self.terminate()
+
+    # def run(self):
+    #    self._do_work()
 
     def run(self):
-        self._do_work()
-
-    def _do_work(self):
         logging.info(f"{self.__class__.__name__}.do_work agent id: {self._agent_id} name: {self._name} starting..")
         while True:
             self._cond.acquire()

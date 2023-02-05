@@ -37,13 +37,15 @@ class OrderEvents:
 
 
 class OrderBook(mp.Process):
+    _fields = ["price", "remaining", "datetime", "id", "agent_id"]
+
     def __init__(self, marketId: int, symbol: str, transactions: Transactions = None):
         self._market_id = marketId
         self._symbol = symbol
         self._history = []
         self._active_orders = []
-        self._active_buy_orders = []
-        self._active_sell_orders = []
+        self._active_buy_orders = mp.Manager().list()
+        self._active_sell_orders = mp.Manager().list()
         self._history_initial_orders = {}
         self._queue = mp.Queue()
         self._stop = mp.Event()
@@ -72,6 +74,39 @@ class OrderBook(mp.Process):
     @property
     def active_sell_orders(self) -> list:
         return self._active_sell_orders
+
+    def buy_orders(self, depth: int = -1) -> list:
+        return sorted(self._active_buy_orders, key=operator.attrgetter("price"), reverse=False)[:depth]
+
+    def sell_orders(self, depth: int = -1) -> list:
+        return sorted(self._active_sell_orders, key=operator.attrgetter("price"), reverse=True)[:depth]
+
+    def orderbook_raw(self, depth: int = -1) -> tuple:
+        # buy_orders = sorted(self._active_buy_orders, key=operator.attrgetter("price"), reverse=False)[:depth]
+        buy_orders = self.buy_orders(depth)
+        # sell_orders = sorted(self._active_sell_orders, key=operator.attrgetter("price"), reverse=True)[:depth]
+        sell_orders = self.sell_orders(depth)
+        logging.info(f"{__class__.__name__}.orderbook_raw buys: {len(buy_orders)} sell: {len(sell_orders)}")
+        return buy_orders, sell_orders
+
+    def orderbook(self, depth: int = -1) -> dict:
+        buys, sells = [], []
+        buy_orders, sell_orders = self.orderbook_raw()
+        if len(buy_orders) > 0:
+            buys = [{k: v for (k, v) in item.__dict__.items() if k in __class__._fields} for item in buy_orders]
+            for item in buys:
+                item["quantity"] = item.pop("remaining")
+                item["datetime"] = item["datetime"].isoformat()
+
+        if len(sell_orders) > 0:
+            sells = [{k: v for (k, v) in item.__dict__.items() if k in __class__._fields} for item in sell_orders]
+            for item in sells:
+                item["quantity"] = item.pop("remaining")
+                item["datetime"] = item["datetime"].isoformat()
+
+        retval = {"symbol": self._symbol, "buy": buys, "sell": sells}
+        logging.info(f"{__class__.__name__}.orderbook buys: {len(buys)} sell: {len(sells)}")
+        return retval
 
     @property
     def events(self):
@@ -129,15 +164,13 @@ class OrderBook(mp.Process):
         logging.info(f"{__class__.__name__}._do_work stopped")
 
     def _process_buy(self, order: Order, transactions: Transactions):
-        logging.info(f"{__class__.__name__}._process_buy {order} size: {transactions.size}")
+        # logging.info(f"{__class__.__name__}._process_buy {order} size: {transactions.size}")
         assert order.side.lower() == "buy"
         market_id = order.market_id
         remaining_quantity = order.quantity
         while True:
             active_sell_orders = [item for item in self._active_sell_orders if item.agent_id != order.agent_id]
             if len(active_sell_orders) > 0:
-                # todo: sell_orders = self._active_sell_orders
-                # sell_orders = sorted(self._active_sell_orders, key=operator.attrgetter("price"))
                 sell_orders = sorted(active_sell_orders, key=operator.attrgetter("price"))
                 best_offer: Order = sell_orders[0]
                 if order.price >= best_offer.price:
@@ -150,7 +183,7 @@ class OrderBook(mp.Process):
                         self._remove_offer(best_offer)
                         remaining_quantity -= transaction_quantity
                         logging.info(
-                            f">>>{__class__.__name__}._process_buy order: {order.id} "
+                            f"{__class__.__name__}._process_buy order: {order.id} "
                             f"partial fill remaining quantity: {remaining_quantity}"
                         )
                         order.remaining = remaining_quantity
@@ -163,7 +196,7 @@ class OrderBook(mp.Process):
                         assert len(transactions.transactions) > 0
                         self._remove_offer(best_offer)
                         logging.info(
-                            f">>>{__class__.__name__}._process_buy order: {order.id} executed "
+                            f"{__class__.__name__}._process_buy order: {order.id} executed "
                             f"order quantity == offer quantity"
                         )
                         order.remaining = 0
@@ -176,7 +209,7 @@ class OrderBook(mp.Process):
                         assert len(transactions.transactions) > 0
                         self._reduce_offer(best_offer, transaction_quantity)
                         logging.info(
-                            f">>>{__class__.__name__}._process_buy order: {order.id} executed "
+                            f"{__class__.__name__}._process_buy order: {order.id} executed "
                             f"order quantity < best offer quantity"
                         )
                         order.remaining = 0
@@ -194,9 +227,10 @@ class OrderBook(mp.Process):
                 self._active_orders.append(order)
                 self._active_buy_orders.append(order)
                 break
+        # logging.info(f"{__class__.__name__}._process_buy active: {self._active_buy_orders}")
 
     def _process_sell(self, order: Order, transactions: Transactions):
-        logging.info(f"{__class__.__name__}._process_sell {order} tx size: {transactions.size}")
+        # logging.info(f"{__class__.__name__}._process_sell {order} tx size: {transactions.size}")
         assert order.side.lower() == "sell"
         assert order.market_id == self._market_id
         market_id = order.market_id
@@ -257,6 +291,7 @@ class OrderBook(mp.Process):
                 self._active_orders.append(order)
                 self._active_sell_orders.append(order)
                 break
+        # logging.info(f"{__class__.__name__}._process_sell active: {self._active_sell_orders}")
 
     def _remove_offer(self, offer: Order):
         for i, order in enumerate(self._active_sell_orders):

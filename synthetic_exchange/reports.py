@@ -1,4 +1,5 @@
 import logging
+import multiprocessing as mp
 import operator
 
 import matplotlib.pyplot as plt
@@ -101,23 +102,26 @@ class Reports:
     def show_orderbook(self, ob: OrderBook, depth: int = 10):
         print(f"{__class__.__name__}.show_orderbook")
         width = len("0       Bert    Buy     33      5")
-        print(width * 2 * "*")
-        assert isinstance(ob.active_sell_orders, list)
+        assert isinstance(ob.active_sell_orders, mp.managers.ListProxy)
+        assert isinstance(ob.active_buy_orders, mp.managers.ListProxy)
 
+        print(width * 1 * "*" + "Active Sell Orders" + width * 1 * "*")
         if len(ob.active_sell_orders) > 0:
             sell_orders = sorted(ob.active_sell_orders, key=operator.attrgetter("price"), reverse=True)[:depth]
             for order in sell_orders:
-                print(width * "." + " " + str(order))
+                # print(width * "." + " " + str(order))
+                print(str(order))
         else:
             logging.warning(f"{__class__.__name__}.show_orderbook no active sell orders")
+        print(width * 1 * "*" + "Active Sell Orders" + width * 1 * "*")
 
-        assert isinstance(ob.active_buy_orders, list)
+        print(width * 1 * "*" + "Active Buy Orders" + width * 1 * "*")
         if len(ob.active_buy_orders) > 0:
             buy_orders = sorted(ob.active_buy_orders, key=operator.attrgetter("price"), reverse=False)[:depth]
             for order in buy_orders:
-                print(str(order) + " " + width * ".")
+                # print(str(order) + " " + width * ".")
+                print(str(order))
         else:
             logging.warning(f"{__class__.__name__}.show_orderbook no active buy orders")
-
-        print(width * 2 * "*")
+        print(width * 1 * "*" + "Active Buy Orders" + width * 1 * "*")
         print(" ")
