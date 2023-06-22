@@ -5,7 +5,7 @@ import operator
 
 from synthetic_exchange.order import Order
 from synthetic_exchange.transaction import Transaction, Transactions
-from synthetic_exchange.utils.observer import Event
+from synthetic_exchange.util import Event
 
 
 class OrderEvent(enum.Enum):
@@ -148,20 +148,34 @@ class OrderBook(mp.Process):
             self._condition.release()
             if order is not None:
                 # print(f"{__class__.__name__}.do_work {order}")
-                self._history_initial_orders[order.id] = {
-                    "id": order.id,
-                    "market": self._market_id,
-                    "side": order.side,
-                    "price": order.price,
-                    "quantity": order.quantity,
-                }
-                if order.side.lower() == "buy":
-                    self._process_buy(order, self._transactions)
-                elif order.side.lower() == "sell":
-                    self._process_sell(order, self._transactions)
+                if order.cancel:
+                    self._process_cancel(order, self._transactions)
                 else:
-                    logging.error(f"{__class__.__name__}._do_work invalid order side: {order.side}")
+                    self._history_initial_orders[order.id] = {
+                        "id": order.id,
+                        "market": self._market_id,
+                        "side": order.side,
+                        "price": order.price,
+                        "quantity": order.quantity,
+                    }
+                    if order.side.lower() == "buy":
+                        self._process_buy(order, self._transactions)
+                    elif order.side.lower() == "sell":
+                        self._process_sell(order, self._transactions)
+                    else:
+                        logging.error(f"{__class__.__name__}._do_work invalid order side: {order.side}")
         logging.info(f"{__class__.__name__}._do_work stopped")
+
+    def _process_cancel(self, order: Order, transactions: Transactions):
+        result = False
+        if order.side.lower() == "buy":
+            result = self._remove_bid(order)
+        elif order.side.lower() == "sell":
+            result = self._remove_offer(order)
+        if result:
+            self._events.on_cancel(order)
+        else:
+            logging.warning(f"{__class__.__name__}._process_cancel fail order: {order}")
 
     def _process_buy(self, order: Order, transactions: Transactions):
         # logging.info(f"{__class__.__name__}._process_buy {order} size: {transactions.size}")
@@ -293,12 +307,15 @@ class OrderBook(mp.Process):
                 break
         # logging.info(f"{__class__.__name__}._process_sell active: {self._active_sell_orders}")
 
-    def _remove_offer(self, offer: Order):
+    def _remove_offer(self, offer: Order) -> bool:
+        retval = False
         for i, order in enumerate(self._active_sell_orders):
             if order.id == offer.id:
                 logging.info(f"{__class__.__name__}._remove_offer order id: {offer.id}")
                 del self._active_sell_orders[i]
+                retval = True
                 break
+        return retval
 
     def _reduce_offer(self, offer: Order, transactionQuantity: int):
         for i, order in enumerate(self._active_sell_orders):
@@ -309,12 +326,15 @@ class OrderBook(mp.Process):
                     self._active_orders[i].quantity -= transactionQuantity
                 break
 
-    def _remove_bid(self, bid: Order):
+    def _remove_bid(self, bid: Order) -> bool:
+        retval = False
         for i, order in enumerate(self._active_buy_orders):
             if order.id == bid.id:
                 logging.info(f"{__class__.__name__}._remove_bid order id: {bid.id}")
                 del self._active_buy_orders[i]
+                retval = True
                 break
+        return retval
 
     def _reduce_bid(self, bid: Order, transactionQuantity: int):
         for i, order in enumerate(self._active_buy_orders):

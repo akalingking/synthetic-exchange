@@ -77,16 +77,17 @@ class MarketTest(unittest.TestCase):
         self._market.show_transactions()
         self._market.show_orderbook()
         ret = self._market.orderbook()
+        print(f"---{__class__.__name__}.test_market orderbook: {ret}")
         buy_orders, sell_orders = self._market._orderbook.orderbook_raw()
         self.assertTrue(isinstance(buy_orders, list))
         self.assertTrue(isinstance(sell_orders, list))
         print(ret)
         self.assertTrue(len(ret["buy"]) == len(buy_orders))
         self.assertTrue(len(ret["sell"]) == len(sell_orders))
-        print(f"buy price: {self._market.get_buy_price()}")
-        print(f"sell price: {self._market.get_sell_price()}")
-        print(f"spread: {self._market.get_spread()}")
-        print(f"mid price: {self._market.get_mid_price()}")
+        print(f"---{__class__.__name__}.test_market buy price: {self._market.get_buy_price()}")
+        print(f"---{__class__.__name__}.test_market sell price: {self._market.get_sell_price()}")
+        print(f"---{__class__.__name__}.test_market spread: {self._market.get_spread()}")
+        print(f"---{__class__.__name__}.test_market mid price: {self._market.get_mid_price()}")
 
 
 if __name__ == "__main__":

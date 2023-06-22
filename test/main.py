@@ -2,6 +2,7 @@ import logging
 import unittest as ut
 from test.test_agents import AgentsTest
 from test.test_market import MarketTest
+from test.test_transactions import TransactionsTest
 
 import matplotlib.pyplot as plt
 
@@ -13,6 +14,7 @@ def main():
         for test in [
             AgentsTest,
             MarketTest,
+            TransactionsTest,
         ]
     ]
     suite = ut.TestSuite(tests)

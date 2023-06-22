@@ -4,7 +4,7 @@ import time
 from typing import List
 
 from synthetic_exchange.agent import Agent
-from synthetic_exchange.utils.observer import Event
+from synthetic_exchange.util import Event
 
 
 class Agents:

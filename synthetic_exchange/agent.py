@@ -23,4 +23,11 @@ class Agent:
         self.strategy.start()
 
     def on_orderbook_event(self, event: dict):
-        logging.info(f"{__class__.__name__}.on_order_event agent id: {self.id} agent name: {self.name} event: {event}")
+        if "agent_id" in event:
+            agent_id = int(event["agent_id"])
+            if agent_id == self.id:
+                self.strategy.orderbook_event(event)
+            else:
+                logging.debug(f"{__class__.__name__}.on_orderbook_event agent_id: {agent_id} id: {self.id}")
+        else:
+            logging.error(f"{__class__.__name__}.on_orderbook_event missing agent_id event: {event}")
