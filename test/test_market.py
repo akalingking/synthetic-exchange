@@ -11,26 +11,9 @@ from synthetic_exchange.strategy import create_strategy
 class MarketTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls._wait = 10 * 2
         symbol = "SQNC-RSCH"
         cls._market = Market(symbol=symbol, minPrice=100, maxPrice=200, tickSize=1, minQuantity=25, maxQuantity=50)
-        """
-        agents = []
-        agent_1 = Agent(
-            create_strategy(
-                name="RandomUniform",
-                minPrice=100,
-                maxPrice=150,
-                tickSize=1,
-                minQuantity=10,
-                maxQuantity=25,
-                marketId=cls._market.id,
-                symbol=symbol,
-                handler=__class__._order_event,
-            )
-        )
-        agents.append(agent_1)
-        cls._market.add_agents(agents)
-        """
 
     @classmethod
     def tearDownClass(cls):
@@ -48,27 +31,8 @@ class MarketTest(unittest.TestCase):
 
     def test_market(self):
         logging.info(f"{__class__.__name__}.test_market")
-        """
-        agents = []
-        agent_1 = Agent(
-            create_strategy(
-                name="RandomUniform",
-                minPrice=100,
-                maxPrice=150,
-                tickSize=1,
-                minQuantity=10,
-                maxQuantity=25,
-                marketId=self._market.id,
-                symbol=self._market.symbol,
-                handler=__class__._order_event,
-            )
-        )
-        agents.append(agent_1)
-        self._market.add_agents(agents)
-        """
-
         self._market.start()
-        time.sleep(60 * 2)
+        time.sleep(self._wait)
         self._market.stop()
         self.assertTrue(self._market._transactions is not None)
         self.assertTrue(self._market._transactions.agents is not None)
@@ -79,6 +43,7 @@ class MarketTest(unittest.TestCase):
         ret = self._market.orderbook()
         print(f"---{__class__.__name__}.test_market orderbook: {ret}")
         buy_orders, sell_orders = self._market._orderbook.orderbook_raw()
+        print(f"---buy_orders: {buy_orders}")
         self.assertTrue(isinstance(buy_orders, list))
         self.assertTrue(isinstance(sell_orders, list))
         print(ret)

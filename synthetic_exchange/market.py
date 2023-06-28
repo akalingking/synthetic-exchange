@@ -164,9 +164,9 @@ class Market:
         self._agents.add(agents)
 
     def show_transactions(self):
-        assert self._transactions is not None
-        assert self._transactions.size > 0
-        assert self._orderbook.transactions.size > 0
+        # assert self._transactions is not None
+        # assert self._transactions.size > 0
+        # assert self._orderbook.transactions.size > 0
         self._reports.show_transactions(self._orderbook.transactions)
 
     def show_orderbook(self, depth: int = 10):

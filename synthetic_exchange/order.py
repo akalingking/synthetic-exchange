@@ -23,9 +23,17 @@ class Order:
             self.market_id = kwargs.get("marketId")
             self.agent_id = kwargs.get("agentId")
             if "dateTime" in kwargs:
-                self.datetime = kwargs.get("dateTime")
+                val = kwargs.get("dateTime")
+                # self.datetime = float(kwargs.get("dateTime"))
+                if isinstance(val, float):
+                    self.datetime = val
+                elif isinstance(val, dt.datetime):
+                    self.datetime = val.timestamp() * 1000
+                if isinstance(val, str):
+                    self.datetime = float(val)
             else:
-                self.datetime = dt.datetime.utcnow()
+                # self.datetime = dt.datetime.utcnow()
+                self.datetime = dt.datetime.utcnow().timestamp() * 1000  # ms
             self.symbol = kwargs.get("symbol")
             self.side = kwargs.get("side")
             self.price = kwargs.get("price")
@@ -45,7 +53,8 @@ class Order:
             if k.lower() == "state":
                 retval[k] = v.name
             elif k.lower() == "datetime":
-                retval[k] = v.isoformat()
+                assert isinstance(v, float)
+                retval[k] = v
             else:
                 retval[k] = v
         return str(retval)

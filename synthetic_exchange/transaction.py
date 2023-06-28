@@ -27,7 +27,8 @@ class Transaction:
         retval = {}
         for k, v in self.__dict__.items():
             if k.lower() == "datetime":
-                retval[k] = v.isoformat()
+                assert isinstance(v, float)
+                retval[k] = v
             else:
                 retval[k] = v
         return str(retval)
@@ -103,7 +104,7 @@ class Transactions:
 
         # Record history
         self._history.append(transaction)
-        self._history_list.append([transaction.id, transaction.datetime.time(), transaction.price])
+        self._history_list.append([transaction.id, transaction.datetime, transaction.price])
         buy_history = [
             [
                 transaction.id,

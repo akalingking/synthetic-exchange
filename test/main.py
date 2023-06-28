@@ -1,6 +1,7 @@
 import logging
 import unittest as ut
 from test.test_agents import AgentsTest
+from test.test_exchange import ExchangeTest
 from test.test_market import MarketTest
 from test.test_transactions import TransactionsTest
 
@@ -15,6 +16,7 @@ def main():
             AgentsTest,
             MarketTest,
             TransactionsTest,
+            ExchangeTest,
         ]
     ]
     suite = ut.TestSuite(tests)

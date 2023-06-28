@@ -11,6 +11,7 @@ from synthetic_exchange.strategy import RandomNormal, RandomUniform
 class AgentsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        cls._wait = 10
         cls._agents = Agents(marketId=0, symbol="SQNC-RSCH")
         agent_1 = Agent(RandomUniform(minPrice=100, maxPrice=130, tickSize=1, minQuantity=100, maxQuantity=200))
         agent_2 = Agent(RandomNormal(initialPrice=100, minQuantity=100, maxQuantity=200))
@@ -36,7 +37,7 @@ class AgentsTest(unittest.TestCase):
         logging.info(f"---{__class__.__name__}.test_add_agent")
         self.assertTrue(self._agents.size > 0)
         self._agents.start()
-        time.sleep(10)
+        time.sleep(self._wait)
         self._agents.stop()
 
 
