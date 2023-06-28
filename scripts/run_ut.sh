@@ -1,2 +1,2 @@
 #!/usr/bin/bash
-python -m test.main
+python -m test.synthetic_exchange.main

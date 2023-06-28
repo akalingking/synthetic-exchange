@@ -1,9 +1,9 @@
 import logging
 import unittest as ut
-from test.test_agents import AgentsTest
-from test.test_exchange import ExchangeTest
-from test.test_market import MarketTest
-from test.test_transactions import TransactionsTest
+from test.synthetic_exchange.test_agents import AgentsTest
+from test.synthetic_exchange.test_exchange import ExchangeTest
+from test.synthetic_exchange.test_market import MarketTest
+from test.synthetic_exchange.test_transactions import TransactionsTest
 
 import matplotlib.pyplot as plt
 
