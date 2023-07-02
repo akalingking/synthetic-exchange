@@ -8,21 +8,15 @@ from synthetic_exchange.util import Event
 
 
 class Agents:
-    def __init__(self, marketId: int, symbol: str):
+    def __init__(self, marketId: int):
         self._market_id = marketId
-        self._symbol = symbol
         self._agents = mp.Manager().dict()
-        # self._agents = {}
         self._order_event = Event()
         # mp.Process.__init__(self)
 
     @property
     def market_id(self):
         return self._market_id
-
-    @property
-    def symbol(self):
-        return self._symbol
 
     @property
     def agents(self):
@@ -34,9 +28,6 @@ class Agents:
 
     def add(self, agents: List[Agent]):
         assert isinstance(agents, list)
-        # for agent in agents:
-        #    assert isinstance(agent, Agent)
-        #    self._agents[agent.id] = agent
         agents_ = {item.id: item for item in agents + self._agents.values()}
         self._agents = agents_
 
@@ -49,17 +40,13 @@ class Agents:
         return retval
 
     def start(self):
-        print(f"{__class__.__name__}.start entry")
         self._do_work()
-        # mp.Process.start(self)
-        print(f"{__class__.__name__}.start exit")
 
     def stop(self):
         self._run = False
         for i, agent in self._agents.items():
             agent.strategy.stop()
         self.wait()
-        # mp.Process.wait(self)
 
     def wait(self):
         for i, agent in self._agents.items():
@@ -67,21 +54,20 @@ class Agents:
 
     @staticmethod
     def on_order_event(order: tuple):
-        print(f"on_order_event order: {order}")
+        print(f"{__class__.__name__}.on_order_event order: {order}")
 
     def _do_work(self):
-        # def run(self):
         for i, agent in self._agents.items():
             agent.start()
 
     def on_buy_event(self, *args, **kwargs):
-        pass
+        raise NotImplementedError()
 
     def on_sell_event(self, *args, **kwargs):
-        pass
+        raise NotImplementedError()
 
     def on_cancel_event(self, *args, **kwargs):
-        pass
+        raise NotImplementedError()
 
     def on_orderbook_event(self, event: dict):
         for i, agent in self._agents.items():

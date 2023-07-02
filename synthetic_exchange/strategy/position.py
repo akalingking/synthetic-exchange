@@ -5,9 +5,12 @@ from synthetic_exchange.order import Order
 
 
 class Position:
-    _id = itertools.count()
+    _last_id = itertools.count()
 
-    def __init__(self, openOrder: Order):
-        self.id = next(__class__._id)
-        self.open = openOrder
-        self.close = None
+    def __init__(self, order: Order):
+        self._id = next(__class__._last_id)
+        self._open_price = order.price
+        self._size = order.quantity
+        self._fill_price = 0
+        self._remaining_size = 0
+        self._average_fill_price

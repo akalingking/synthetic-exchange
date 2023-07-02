@@ -34,7 +34,8 @@ class MarketApplication(Application):
             symbol=self._currency, minPrice=100, maxPrice=200, tickSize=1, minQuantity=25, maxQuantity=50
         )
         self._wait = 30
-        Application.__init__(self)
+        kwargs = {"wait": 10}
+        Application.__init__(self, **kwargs)
         self._market.start()
 
     def run(self):
@@ -44,7 +45,15 @@ class MarketApplication(Application):
         bid_p = self._market.get_buy_price()
         ask_p = self._market.get_sell_price()
         spread = self._market.get_spread()
-        print(f"{__class__.__name__}._do_work {self._currency} bid: {bid_p} ask: {ask_p} spread: {spread}")
+        logging.info(f"{__class__.__name__}._do_work {self._currency} bid: {bid_p} ask: {ask_p} spread: {spread}")
+        self.show_transactions()
+        # self.show_orderbook()
+
+    def show_transactions(self):
+        self._market.show_transactions()
+
+    def show_orderbook(self):
+        self._market.show_orderbook()
 
 
 def main():

@@ -3,6 +3,8 @@ import logging
 
 
 class Agent:
+    """Trading endpoint currently supports single strategy"""
+
     _last_id = itertools.count()
 
     def __init__(self, strategy, **params):

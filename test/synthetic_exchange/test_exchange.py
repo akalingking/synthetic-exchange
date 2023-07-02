@@ -59,9 +59,24 @@ class ExchangeTest(unittest.TestCase):
         self.assertTrue(all([i in exchange_symbols for i in symbols]))
         for symbol in symbols:
             ob = self._exchange.orderbook(symbol)
+            print(f"******{symbol} orderbook*******")
             logging.info(f"---{__class__.__name__}.test_exchange {symbol} ob: {ob}")
+            print(f"******{symbol} orderbook*******")
             self.assertTrue(isinstance(ob, dict))
             self.assertTrue(all([i in ob for i in ["symbol", "bids", "asks"]]))
+
+        # Show all transactions
+        for symbol, market in self._exchange._markets.items():
+            print(f"******{symbol} transactions*******")
+            for k, v in market._transactions._transactions.items():
+                print(v)
+            print(f"******{symbol} transactions*******")
+        # Show history
+        for symbol, market in self._exchange._markets.items():
+            print(f"******{symbol} history*******")
+            for v in market._transactions._history:
+                print(v)
+            print(f"******{symbol} history*******")
 
 
 if __name__ == "__main__":

@@ -25,15 +25,12 @@ class MarketTest(unittest.TestCase):
     def tearDown(self):
         pass
 
-    @staticmethod
-    def _order_event(order: Order):
-        logging.info(f"{__class__.__name__}._order_event order: {order}")
-
     def test_market(self):
         logging.info(f"{__class__.__name__}.test_market")
         self._market.start()
         time.sleep(self._wait)
         self._market.stop()
+
         self.assertTrue(self._market._transactions is not None)
         self.assertTrue(self._market._transactions.agents is not None)
         self.assertTrue(self._market._transactions.agents.agents is not None)

@@ -1,3 +1,4 @@
+import itertools
 import logging
 import multiprocessing as mp
 from abc import ABC, abstractmethod
@@ -6,13 +7,16 @@ from synthetic_exchange.util import Event
 
 
 class Strategy(ABC, mp.Process):
+    _last_id = itertools.count()
+
     def __init__(self):
         self._order_event = Event()
         self._lock = mp.Lock()
         self._cond = mp.Condition(self._lock)
         self._timeout = 3
         self._stop = mp.Event()
-        self._agent_id = 0
+        self._id = next(__class__._last_id)
+        self._agent_id = None
         mp.Process.__init__(self)
 
     @property
@@ -38,7 +42,6 @@ class Strategy(ABC, mp.Process):
         self._lock.acquire()
         self._stop.set()
         self._cond.notify()
-        self._cond.notify()
         self._lock.release()
         mp.Process.terminate(self)
 
@@ -46,9 +49,10 @@ class Strategy(ABC, mp.Process):
         self.terminate()
 
     def run(self):
-        logging.info(f"{self.__class__.__name__}.do_work agent id: {self._agent_id} name: {self._name} starting..")
+        logging.debug(f"{self.__class__.__name__}.do_work agent id: {self._agent_id} name: {self._name} starting..")
         while True:
             self._cond.acquire()
+            # logging.debug(f"{self.__class__.__name__}.do_work wait id: {self._agent_id} name: {self._name} wait {self._timeout} seconds..")
             self._cond.wait(timeout=self._timeout)
             if not self._stop.is_set():
                 self._cond.release()
@@ -56,7 +60,7 @@ class Strategy(ABC, mp.Process):
             else:
                 self._cond.release()
                 break
-        logging.info(f"{self.__class__.__name__}.do_work agent id: {self._agent_id} name: {self._name} stopped!")
+        logging.debug(f"{self.__class__.__name__}.do_work agent id: {self._agent_id} name: {self._name} stopped!")
 
     @abstractmethod
     def do_work(self):

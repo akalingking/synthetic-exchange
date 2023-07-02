@@ -14,26 +14,24 @@ class Order:
         Cancelled = 3
         Failed = 4
 
-    _id = itertools.count()
+    _last_id = itertools.count()
 
     def __init__(self, **kwargs):
-        self.id = next(__class__._id)
-        self.state = __class__.State.Open
         try:
-            self.market_id = kwargs.get("marketId")
-            self.agent_id = kwargs.get("agentId")
-            if "dateTime" in kwargs:
-                val = kwargs.get("dateTime")
-                # self.datetime = float(kwargs.get("dateTime"))
+            self.id = next(__class__._last_id)
+            self.state = __class__.State.Open
+            self.market_id = kwargs.get("marketid")
+            self.agent_id = kwargs.get("agentid")
+            if "timestamp" in kwargs:
+                val = kwargs.get("timestamp")
                 if isinstance(val, float):
-                    self.datetime = val
+                    self.timestamp = val
                 elif isinstance(val, dt.datetime):
-                    self.datetime = val.timestamp() * 1000
+                    self.timestamp = val.timestamp() * 1000
                 if isinstance(val, str):
-                    self.datetime = float(val)
+                    self.timestamp = float(val)
             else:
-                # self.datetime = dt.datetime.utcnow()
-                self.datetime = dt.datetime.utcnow().timestamp() * 1000  # ms
+                self.timestamp = dt.datetime.utcnow().timestamp() * 1000  # ms
             self.symbol = kwargs.get("symbol")
             self.side = kwargs.get("side")
             self.price = kwargs.get("price")
@@ -52,7 +50,7 @@ class Order:
         for k, v in self.__dict__.items():
             if k.lower() == "state":
                 retval[k] = v.name
-            elif k.lower() == "datetime":
+            elif k.lower() == "timestamp":
                 assert isinstance(v, float)
                 retval[k] = v
             else:

@@ -35,39 +35,40 @@ class Market:
         self._tick_size = tickSize
         self._min_quantity = minQuantity
         self._max_quantity = maxQuantity
+        self._orderbook = None
         self._reports = Reports(self._id)
         __class__._markets[self._id] = self
 
     def _create_agents(self):
-        self._agents = Agents(symbol=self._symbol, marketId=0)
+        self._agents = Agents(marketId=self._id)
         agents = []
-        agent_1 = Agent(
-            create_strategy(
-                name="RandomUniform",
-                minPrice=100,
-                maxPrice=150,
-                tickSize=1,
-                minQuantity=10,
-                maxQuantity=25,
-                marketId=self._id,
-                symbol=self._symbol,
-                handler=__class__._order_event,
-            )
+
+        strategy_1 = create_strategy(
+            name="RandomUniform",
+            minPrice=100,
+            maxPrice=150,
+            tickSize=1,
+            minQuantity=10,
+            maxQuantity=25,
+            marketId=self._id,
+            symbol=self._symbol,
+            handler=__class__._order_event,
         )
+        agent_1 = Agent(strategy_1)
         agents.append(agent_1)
-        agent_2 = Agent(
-            create_strategy(
-                name="RandomUniform",
-                minPrice=100,
-                maxPrice=150,
-                tickSize=1,
-                minQuantity=10,
-                maxQuantity=25,
-                marketId=self._id,
-                symbol=self._symbol,
-                handler=__class__._order_event,
-            )
+
+        strategy_2 = create_strategy(
+            name="RandomUniform",
+            minPrice=100,
+            maxPrice=150,
+            tickSize=1,
+            minQuantity=10,
+            maxQuantity=25,
+            marketId=self._id,
+            symbol=self._symbol,
+            handler=__class__._order_event,
         )
+        agent_2 = Agent(strategy_2)
         agents.append(agent_2)
         self._agents.add(agents)
 
@@ -83,23 +84,24 @@ class Market:
             logging.error(f"{__class__.__name__}._orderbook_event exception: {e}")
 
     @staticmethod
-    def _order_event(order: dict):
-        logging.info(f"{__class__.__name__}._order_event: {order}")
-        assert isinstance(order, dict)
-        if "marketId" in order:
-            market_id = order.get("marketId")
+    def _order_event(event: dict):
+        logging.info(f"{__class__.__name__}._order_event: {event}")
+        assert isinstance(event, dict)
+        if "marketid" in event:
+            market_id = event.get("marketid")
             if market_id in __class__._markets:
                 market = __class__._markets[market_id]
                 assert market is not None
-                order_ = Order(**order)
-                assert order_ is not None
-                market.on_order_event(order_)
+                order = Order(**event)
+                assert order is not None
+                market.on_order_event(order)
             else:
                 logging.error(f"{__class__.__name__}._order_event invalid market id: {market_id}")
         else:
             logging.error(f"{__class__.__name__}._order_event missing market id")
 
     def on_order_event(self, order: Order):
+        assert isinstance(order, Order)
         self._orderbook.process(order)
 
     @property
@@ -164,13 +166,23 @@ class Market:
         self._agents.add(agents)
 
     def show_transactions(self):
-        # assert self._transactions is not None
-        # assert self._transactions.size > 0
-        # assert self._orderbook.transactions.size > 0
-        self._reports.show_transactions(self._orderbook.transactions)
+        logging.info(f"{__class__.__name__}.show_transactions entry")
+        try:
+            # assert self._transactions is not None
+            # assert self._transactions.size > 0
+            # assert self._orderbook.transactions.size > 0
+            self._reports.show_transactions(self._orderbook.transactions)
+        except Exception as e:
+            logging.error(f"{__class__.__name__}.show_transactions e: {e}")
+        logging.info(f"{__class__.__name__}.show_transactions exit")
 
     def show_orderbook(self, depth: int = 10):
-        self._reports.show_orderbook(self._orderbook, depth)
+        logging.info(f"{__class__.__name__}.show_orderbook entry")
+        try:
+            self._reports.show_orderbook(self._orderbook, depth)
+        except Exception as e:
+            logging.error(f"{__class__.__name__}.show_orderbook e: {e}")
+        logging.info(f"{__class__.__name__}.show_orderbook exit")
 
     def get_last_price(self):
         retval = None

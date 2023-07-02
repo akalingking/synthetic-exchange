@@ -15,6 +15,8 @@ class OrderEvent(enum.Enum):
 
 
 class OrderEvents:
+    """todo: Send dict or order type, update position & strategy classes"""
+
     def __init__(self):
         self.partial_fill = Event()
         self.fill = Event()
@@ -37,8 +39,8 @@ class OrderEvents:
 
 
 class OrderBook(mp.Process):
-    _fields = ["price", "remaining", "datetime", "id", "agent_id"]
-    _max_size = 2000
+    _fields = ["price", "remaining", "timestamp", "id", "agent_id"]
+    _max_size = 100
 
     def __init__(self, marketId: int, symbol: str, transactions: Transactions = None):
         self._market_id = marketId
@@ -98,15 +100,13 @@ class OrderBook(mp.Process):
             buys = [{k: v for (k, v) in item.__dict__.items() if k in __class__._fields} for item in buy_orders]
             for item in buys:
                 item["quantity"] = item.pop("remaining")
-                # item["datetime"] = item["datetime"].isoformat()
-                item["datetime"] = item["datetime"]
+                item["timestamp"] = item["timestamp"]
 
         if len(sell_orders) > 0:
             sells = [{k: v for (k, v) in item.__dict__.items() if k in __class__._fields} for item in sell_orders]
             for item in sells:
                 item["quantity"] = item.pop("remaining")
-                # item["datetime"] = item["datetime"].isoformat()
-                item["datetime"] = item["datetime"]
+                item["timestamp"] = item["timestamp"]
 
         retval = {"symbol": self._symbol, "bids": buys, "asks": sells}
         logging.info(f"{__class__.__name__}.orderbook buys: {len(buys)} sell: {len(sells)}")

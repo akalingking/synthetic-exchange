@@ -16,7 +16,7 @@ class Transaction:
         assert sellOrder.market_id == marketId
         __class__._count += 1
         self.id = next(__class__._last_id)
-        self.datetime = max(buyOrder.datetime, sellOrder.datetime)
+        self.timestamp = max(buyOrder.timestamp, sellOrder.timestamp)
         self.market_id = marketId
         self.buy_order = buyOrder
         self.sell_order = sellOrder
@@ -26,7 +26,7 @@ class Transaction:
     def __str__(self):
         retval = {}
         for k, v in self.__dict__.items():
-            if k.lower() == "datetime":
+            if k.lower() == "timestamp":
                 assert isinstance(v, float)
                 retval[k] = v
             else:
@@ -104,7 +104,7 @@ class Transactions:
 
         # Record history
         self._history.append(transaction)
-        self._history_list.append([transaction.id, transaction.datetime, transaction.price])
+        self._history_list.append([transaction.id, transaction.timestamp, transaction.price])
         buy_history = [
             [
                 transaction.id,
