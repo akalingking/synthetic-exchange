@@ -3,7 +3,6 @@ import itertools
 import logging
 import multiprocessing as mp
 
-from synthetic_exchange import classproperty
 from synthetic_exchange.order import Order
 
 

@@ -9,7 +9,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from synthetic_exchange import classproperty
 from synthetic_exchange.agent import Agent
 from synthetic_exchange.agents import Agents
 from synthetic_exchange.order import Order
