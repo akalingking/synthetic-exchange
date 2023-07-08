@@ -1,7 +1,7 @@
 # from .exchange import Exchange
 from .order import Order
 from .orderbook import OrderBook
-from .transaction import Transaction
+from .transaction import Transaction, Transactions
 
 
 class classproperty(property):

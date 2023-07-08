@@ -87,8 +87,8 @@ class Market:
         return self._reports
 
     @property
-    def transactions(self) -> dict:
-        return self._orderbook.transactions.transactions
+    def transactions(self) -> Transactions:
+        return self._orderbook.transactions
 
     def orderbook(self, depth: int = -1) -> dict:
         return self._orderbook.orderbook(depth)

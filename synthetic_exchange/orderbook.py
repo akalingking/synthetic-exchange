@@ -47,6 +47,7 @@ class OrderBook(mp.Process):
         assert "marketId" in kwargs, f"{__class__.__name__} missing marketId"
         assert "symbol" in kwargs, f"{__class__.__name__} missing symbol"
         assert "queue" in kwargs, f"{__class__.__name__} missing queue"
+
         self._market_id = kwargs.get("marketId", None)
         self._symbol = kwargs.get("symbol", None)
         self._transactions = kwargs.get("transactions", None)
@@ -75,8 +76,8 @@ class OrderBook(mp.Process):
         return self._market_id
 
     @property
-    def transactions(self) -> dict:
-        return self._transactions.transactions
+    def transactions(self) -> Transactions:
+        return self._transactions
 
     @property
     def active_buy_orders(self) -> list:
@@ -126,58 +127,8 @@ class OrderBook(mp.Process):
             self._stop.set()
         mp.Process.terminate(self)
 
-    """
-    def process(self, order: Order):
-        try:
-            with self._lock:
-                self._queue.put_nowait(order)
-                self._queue_cond.notify()
-        except mp.queue.Full:
-            logging.warning(f"{__class__.__name__}.process pid: {self.pid} queue is full size: {self._queue.qsize()}")
-        except Exception as e:
-            logging.error(f"{__class__.__name__}.process pid: {self.pid} e: {e}")
-    """
-
     def run(self):
         self._do_work()
-
-    """
-    def _do_work(self):
-        logging.debug(f"{__class__.__name__}._do_work start")
-
-        while True:
-            self._cond.acquire()
-            while self._queue.empty() and not self._stop_event.is_set():
-                logging.debug(f"{__class__.__name__}._do_work pid: {self.pid} wait for orders..")
-                self._cond.wait(timeout=10)
-            if self._stop_event.is_set():
-                self._cond.release()
-                break
-
-            order: Order = self._queue.get()
-            self._cond.release()
-
-            if order is not None:
-                logging.debug(f"{__class__.__name__}.do_work {type(order)}: {order}")
-                if order.cancel:
-                    self._process_cancel(order, self._transactions)
-                else:
-                    self._history_initial_orders[order.id] = {
-                        "id": order.id,
-                        "market": self._market_id,
-                        "side": order.side,
-                        "price": order.price,
-                        "quantity": order.quantity,
-                    }
-                    if order.side.lower() == "buy":
-                        self._process_buy(order, self._transactions)
-                    elif order.side.lower() == "sell":
-                        self._process_sell(order, self._transactions)
-                    else:
-                        logging.error(f"{__class__.__name__}._do_work pid: {self.pid} invalid order side: {order.side}")
-
-        logging.debug(f"{__class__.__name__}._do_work stopped")
-    """
 
     def _do_work(self):
         logging.debug(f"{__class__.__name__}._do_work start")

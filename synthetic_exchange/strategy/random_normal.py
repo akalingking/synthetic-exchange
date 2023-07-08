@@ -25,7 +25,7 @@ class RandomNormal(Agent):
             std = 0.1 * self._last_price
             price = np.random.normal(self._last_price, std)
             self._last_price = price
-            quantity = random.randint(self._min_quantity, self._max_quantity)
+            quantity = random.uniform(self._min_quantity, self._max_quantity)
             kwargs = {
                 "marketid": self._market_id,
                 "agentid": self.id,
@@ -46,7 +46,7 @@ class RandomNormal(Agent):
     def orderbook_event(self, event: dict):
         logging.debug(f"{__class__.__name__}.orderbook_event event: {event}")
 
-        event_type: str = event["event"]
+        event_type: str = event["event"].lower()
         if event_type == "cancel":
             pass
         elif event_type == "fill":
@@ -54,4 +54,4 @@ class RandomNormal(Agent):
         elif event_type == "partially_filled":
             pass
         else:
-            logging.error(f"{__class__.__name__}.orderbook_event unhandled event: {event_type}")
+            logging.warning(f"{__class__.__name__}.orderbook_event unhandled event: {event_type}")

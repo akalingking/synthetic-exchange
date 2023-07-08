@@ -11,21 +11,23 @@ from synthetic_exchange.strategy.agent import Agent
 class RandomUniform(Agent):
     def __init__(self, *args, **kwargs):
         Agent.__init__(self, *args, **kwargs)
-        self._market_id = kwargs.get("marketId")
-        self._min_price = kwargs.get("minPrice")
-        self._max_price = kwargs.get("maxPrice")
-        self._tick_size = kwargs.get("tickSize")
-        self._min_quantity = kwargs.get("minQuantity")
-        self._max_quantity = kwargs.get("maxQuantity")
         assert self._queue is not None
+        try:
+            self._market_id = kwargs.get("marketId")
+            self._min_price = kwargs.get("minPrice")
+            self._max_price = kwargs.get("maxPrice")
+            self._tick_size = kwargs.get("tickSize")
+            self._min_quantity = kwargs.get("minQuantity")
+            self._max_quantity = kwargs.get("maxQuantity")
+        except Exception as e:
+            logging.error(f"{__class__.__name__}.__init__ e: {e}")
 
     def _do_work(self):
         try:
             side = random.choice(["BUY", "SELL"])
             prices = np.arange(self._min_price, self._max_price, self._tick_size)
             price = np.random.choice(prices)
-            quantity = random.randint(self._min_quantity, self._max_quantity)
-            # self._order_event.emit((self._market_id, self._symbol, side, price, quantity))
+            quantity = random.uniform(self._min_quantity, self._max_quantity)
             kwargs = {
                 "marketid": self._market_id,
                 "agentid": self.id,
