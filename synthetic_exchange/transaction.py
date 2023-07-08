@@ -57,9 +57,8 @@ class Transaction:
 
 
 class Transactions:
-    def __init__(self, marketId, agents):
+    def __init__(self, agents: dict):
         assert agents is not None
-        self._market_id = marketId
         self._history = mp.Manager().list()
         self._history_list = mp.Manager().list()
         self._history_market_agent = mp.Manager().dict()

@@ -1,6 +1,6 @@
 import logging
 import unittest as ut
-from test.synthetic_exchange.test_agents import AgentsTest
+from test.synthetic_exchange.test_agent import AgentTest
 from test.synthetic_exchange.test_exchange import ExchangeTest
 from test.synthetic_exchange.test_market import MarketTest
 from test.synthetic_exchange.test_transactions import TransactionsTest
@@ -13,7 +13,7 @@ def main():
     tests = [
         loader.loadTestsFromTestCase(test)
         for test in [
-            AgentsTest,
+            AgentTest,
             MarketTest,
             TransactionsTest,
             ExchangeTest,

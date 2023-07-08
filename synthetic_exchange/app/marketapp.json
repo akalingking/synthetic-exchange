@@ -1,0 +1,23 @@
+{
+    "application": {
+        "name": "marketapp",
+        "debug": "true",
+        "host": "localhost",
+        "port": 8080,
+        "logLevel": "debug",
+        "logToFile": "true",
+        "logFile": "./synthetic_exchange/app/marketapp.log",
+        "wait": 180,
+        "plot": "false",
+        "useWsgi": "false"
+    },
+    "currencies": {
+        "SQNC-RSCH": {
+            "minPrice": 100,
+            "maxPrice": 120,
+            "tickSize": 1,
+            "minQuantity": 25,
+            "maxQuantity": 50 
+        }
+    }
+}

@@ -1,0 +1,29 @@
+<html>
+<head>
+    <title>{{title}}</title>
+</head>
+<body>
+    <div>
+        <table>
+            <tr>
+                {% for col in header %}
+                    <th class="cell"><font size="3.0" color="gray">{{col}}</font></th>
+                {% endfor %}
+            </tr>
+            {% for row in data %}
+            <tr class="row">
+                {% for cell in row %}
+                    <td><font size="3.0">{{cell}}</font></td>
+                {% endfor %}  
+            </tr>
+            {% endfor %}
+        </table>
+    </div>  
+    <div>
+        <tr>
+        <td><strong>{{title}} Transactions: {{risk}} %</strong></td>
+        </tr>
+    </div>
+</body>
+</html>
+

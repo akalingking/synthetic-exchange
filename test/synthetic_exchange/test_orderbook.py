@@ -3,14 +3,13 @@ import multiprocessing as mp
 import time
 import unittest
 
-from synthetic_exchange.market import Market
 from synthetic_exchange.orderbook import OrderBook
 from synthetic_exchange.strategy.random_normal import RandomNormal
 from synthetic_exchange.strategy.random_uniform import RandomUniform
 from synthetic_exchange.transaction import Transactions
 
 
-class MarketTest(unittest.TestCase):
+class OrderBookTest(unittest.TestCase):
     _transactions_on = True
 
     @classmethod
@@ -60,11 +59,9 @@ class MarketTest(unittest.TestCase):
             marketId=0, symbol=symbols[0], transactions=cls._transactions, wait=5, queue=cls._queue
         )
         for _, agent in cls._agents.items():
-            cls._orderbook.events.cancel.subscribe(__class__._order_event)
-            cls._orderbook.events.fill.subscribe(__class__._order_event)
-            cls._orderbook.events.cancel.subscribe(__class__._order_event)
-
-        cls._market = Market(orderbook=cls._orderbook)
+            cls._orderbook.events.cancel.subscribe(OrderBookTest._order_event)
+            cls._orderbook.events.fill.subscribe(OrderBookTest._order_event)
+            cls._orderbook.events.cancel.subscribe(OrderBookTest._order_event)
 
     @classmethod
     def tearDownClass(cls):
@@ -81,21 +78,25 @@ class MarketTest(unittest.TestCase):
         assert isinstance(event, dict)
         logging.info(f"---{__class__.__name__}._order_event event: {event}")
 
-    def test_market(self):
-        logging.info(f"---{__class__.__name__}.test_market")
+    def test_orderbook(self):
+        logging.info(f"---{__class__.__name__}.test_orderbook")
 
-        self._market.start()
+        for _, agent in self._agents.items():
+            agent.start()
+        self._orderbook.start()
 
         time.sleep(self._wait)
 
-        self._market.stop()
+        self._orderbook.stop()
+        for _, agent in self._agents.items():
+            agent.stop()
 
         # Empty transactions since there is no OrderBook process
         if self._transactions is not None:
             history = self._transactions.history
-            logging.info(f"---{__class__.__name__}.test_market history: {history}")
+            logging.info(f"---{__class__.__name__}.test_orderbook history: {history}")
             transactions = self._transactions.transactions
-            logging.info(f"---{__class__.__name__}.test_market transactions: {transactions}")
+            logging.info(f"---{__class__.__name__}.test_orderbook transactions: {transactions}")
 
 
 if __name__ == "__main__":

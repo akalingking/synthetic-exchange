@@ -1,8 +1,9 @@
+import json
 import linecache
 import os
 import tracemalloc
 
-from .observer import Event
+from .observer import Event, ProcessEvent
 
 
 def _trace_top_malloc(snapshot, key_type="lineno", limit=5):
@@ -40,3 +41,13 @@ def tracemalloc_start():
 def tracemalloc_stop():
     snapshot = tracemalloc.take_snapshot()
     _trace_top_malloc(snapshot)
+
+
+def get_config_from_file(fname: str) -> dict:
+    retval = None
+    try:
+        with open(fname) as f:
+            retval = json.load(f)
+    except Exception as e:
+        print(f"_get_config_from_file exception: '{e}'")
+    return retval

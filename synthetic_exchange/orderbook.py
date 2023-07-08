@@ -3,6 +3,7 @@ import logging
 import multiprocessing as mp
 import operator
 
+from synthetic_exchange.app import Application
 from synthetic_exchange.order import Order
 from synthetic_exchange.transaction import Transaction, Transactions
 from synthetic_exchange.util import Event
@@ -42,21 +43,27 @@ class OrderBook(mp.Process):
     _fields = ["price", "remaining", "timestamp", "id", "agent_id"]
     _max_size = 100
 
-    def __init__(self, marketId: int, symbol: str, transactions: Transactions = None):
-        self._market_id = marketId
-        self._symbol = symbol
+    def __init__(self, *args, **kwargs):
+        assert "marketId" in kwargs, f"{__class__.__name__} missing marketId"
+        assert "symbol" in kwargs, f"{__class__.__name__} missing symbol"
+        assert "queue" in kwargs, f"{__class__.__name__} missing queue"
+        self._market_id = kwargs.get("marketId", None)
+        self._symbol = kwargs.get("symbol", None)
+        self._transactions = kwargs.get("transactions", None)
+        self._wait = kwargs.get("wait", 30)
+        self._queue = kwargs.get("queue", None)
+
         self._history = []
         self._active_orders = []
         self._active_buy_orders = mp.Manager().list()
         self._active_sell_orders = mp.Manager().list()
         self._history_initial_orders = {}
-        # warn: Use multiprocessing objects since start and stop can be initiated from different processes
+
+        self._lock = mp.RLock()
         self._stop = mp.Event()
-        self._lock = mp.Lock()
-        self._condition = mp.Condition(self._lock)
-        self._queue = mp.Queue(maxsize=__class__._max_size)
+        self._cond = mp.Condition(self._lock)
         self._events = OrderEvents()
-        self._transactions = transactions
+
         mp.Process.__init__(self)
 
     @property
@@ -68,8 +75,8 @@ class OrderBook(mp.Process):
         return self._market_id
 
     @property
-    def transactions(self) -> Transactions:
-        return self._transactions
+    def transactions(self) -> dict:
+        return self._transactions.transactions
 
     @property
     def active_buy_orders(self) -> list:
@@ -79,23 +86,19 @@ class OrderBook(mp.Process):
     def active_sell_orders(self) -> list:
         return self._active_sell_orders
 
+    @property
+    def events(self):
+        return self._events
+
     def buy_orders(self, depth: int = -1) -> list:
         return sorted(self._active_buy_orders, key=operator.attrgetter("price"), reverse=False)[:depth]
 
     def sell_orders(self, depth: int = -1) -> list:
         return sorted(self._active_sell_orders, key=operator.attrgetter("price"), reverse=True)[:depth]
 
-    def orderbook_raw(self, depth: int = -1) -> tuple:
-        # buy_orders = sorted(self._active_buy_orders, key=operator.attrgetter("price"), reverse=False)[:depth]
-        buy_orders = self.buy_orders(depth)
-        # sell_orders = sorted(self._active_sell_orders, key=operator.attrgetter("price"), reverse=True)[:depth]
-        sell_orders = self.sell_orders(depth)
-        logging.info(f"{__class__.__name__}.orderbook_raw buys: {len(buy_orders)} sell: {len(sell_orders)}")
-        return buy_orders, sell_orders
-
     def orderbook(self, depth: int = -1) -> dict:
         buys, sells = [], []
-        buy_orders, sell_orders = self.orderbook_raw()
+        buy_orders, sell_orders = self.buy_orders(depth), self.sell_orders(depth)
         if len(buy_orders) > 0:
             buys = [{k: v for (k, v) in item.__dict__.items() if k in __class__._fields} for item in buy_orders]
             for item in buys:
@@ -112,10 +115,6 @@ class OrderBook(mp.Process):
         logging.info(f"{__class__.__name__}.orderbook buys: {len(buys)} sell: {len(sells)}")
         return retval
 
-    @property
-    def events(self):
-        return self._events
-
     def start(self):
         mp.Process.start(self)
 
@@ -123,36 +122,76 @@ class OrderBook(mp.Process):
         mp.Process.wait(self)
 
     def stop(self):
-        with self._condition:
+        with self._cond:
             self._stop.set()
-            self._condition.notify()
+        mp.Process.terminate(self)
 
+    """
     def process(self, order: Order):
         try:
             with self._lock:
                 self._queue.put_nowait(order)
-                self._condition.notify()
+                self._queue_cond.notify()
         except mp.queue.Full:
             logging.warning(f"{__class__.__name__}.process pid: {self.pid} queue is full size: {self._queue.qsize()}")
         except Exception as e:
             logging.error(f"{__class__.__name__}.process pid: {self.pid} e: {e}")
+    """
 
     def run(self):
         self._do_work()
+
+    """
+    def _do_work(self):
+        logging.debug(f"{__class__.__name__}._do_work start")
+
+        while True:
+            self._cond.acquire()
+            while self._queue.empty() and not self._stop_event.is_set():
+                logging.debug(f"{__class__.__name__}._do_work pid: {self.pid} wait for orders..")
+                self._cond.wait(timeout=10)
+            if self._stop_event.is_set():
+                self._cond.release()
+                break
+
+            order: Order = self._queue.get()
+            self._cond.release()
+
+            if order is not None:
+                logging.debug(f"{__class__.__name__}.do_work {type(order)}: {order}")
+                if order.cancel:
+                    self._process_cancel(order, self._transactions)
+                else:
+                    self._history_initial_orders[order.id] = {
+                        "id": order.id,
+                        "market": self._market_id,
+                        "side": order.side,
+                        "price": order.price,
+                        "quantity": order.quantity,
+                    }
+                    if order.side.lower() == "buy":
+                        self._process_buy(order, self._transactions)
+                    elif order.side.lower() == "sell":
+                        self._process_sell(order, self._transactions)
+                    else:
+                        logging.error(f"{__class__.__name__}._do_work pid: {self.pid} invalid order side: {order.side}")
+
+        logging.debug(f"{__class__.__name__}._do_work stopped")
+    """
 
     def _do_work(self):
         logging.debug(f"{__class__.__name__}._do_work start")
 
         while True:
-            self._condition.acquire()
-            while self._queue.empty() and not self._stop.is_set():
-                logging.debug(f"{__class__.__name__}._do_work pid: {self.pid} wait for orders..")
-                self._condition.wait(timeout=10)
-            if self._stop.is_set():
-                self._condition.release()
-                break
-            order: Order = self._queue.get()
-            self._condition.release()
+            with self._cond:
+                if self._stop.is_set():
+                    break
+            # order: Order = self._queue.get()
+            kwargs = self._queue.get()
+            order = None
+            if kwargs is not None:
+                order = Order(**kwargs)
+
             if order is not None:
                 logging.debug(f"{__class__.__name__}.do_work {type(order)}: {order}")
                 if order.cancel:
@@ -175,7 +214,8 @@ class OrderBook(mp.Process):
         logging.debug(f"{__class__.__name__}._do_work stopped")
 
     def _process_cancel(self, order: Order, transactions: Transactions):
-        logging.debug(f"{__class__.__name__}._process_cancel order: {order} size: {transactions.size} entry")
+        # logging.debug(f"{__class__.__name__}._process_cancel order: {order} size: {transactions.size} entry")
+        logging.debug(f"{__class__.__name__}._process_cancel order: {order} entry")
 
         result = False
         if order.side.lower() == "buy":
@@ -187,11 +227,13 @@ class OrderBook(mp.Process):
         else:
             logging.warning(f"{__class__.__name__}._process_cancel pid: {self.pid} fail order: {order}")
 
-        logging.debug(f"{__class__.__name__}._process_cancel order: {order} size: {transactions.size} exit")
+        # logging.debug(f"{__class__.__name__}._process_cancel order: {order} size: {transactions.size} exit")
 
     def _process_buy(self, order: Order, transactions: Transactions):
-        logging.debug(f"{__class__.__name__}._process_buy {order} size: {transactions.size} entry")
+        # logging.debug(f"{__class__.__name__}._process_buy {order} size: {transactions.size} entry")
+        logging.debug(f"{__class__.__name__}._process_buy {order} entry")
 
+        assert isinstance(order, Order)
         assert order.side.lower() == "buy"
         market_id = order.market_id
         remaining_quantity = order.quantity
@@ -205,8 +247,11 @@ class OrderBook(mp.Process):
                     if remaining_quantity > best_offer.quantity:
                         transaction_quantity = best_offer.quantity
                         # Transaction(order, best_offer, market_id, transaction_price, transaction_quantity)
-                        _ = transactions.create(order, best_offer, market_id, transaction_price, transaction_quantity)
-                        assert len(transactions.transactions) > 0
+                        if transactions is not None:
+                            _ = transactions.create(
+                                order, best_offer, market_id, transaction_price, transaction_quantity
+                            )
+                            assert len(transactions.transactions) > 0
                         self._remove_offer(best_offer)
                         remaining_quantity -= transaction_quantity
                         logging.info(
@@ -219,8 +264,11 @@ class OrderBook(mp.Process):
                     elif remaining_quantity == best_offer.quantity:
                         transaction_quantity = best_offer.quantity
                         # Transaction(order, best_offer, market_id, transaction_price, transaction_quantity)
-                        _ = transactions.create(order, best_offer, market_id, transaction_price, transaction_quantity)
-                        assert len(transactions.transactions) > 0
+                        if transactions is not None:
+                            _ = transactions.create(
+                                order, best_offer, market_id, transaction_price, transaction_quantity
+                            )
+                            assert len(transactions.transactions) > 0
                         self._remove_offer(best_offer)
                         logging.info(
                             f"{__class__.__name__}._process_buy pid: {self.pid} order: {order.id} executed "
@@ -232,8 +280,11 @@ class OrderBook(mp.Process):
                     else:
                         transaction_quantity = remaining_quantity
                         # Transaction(order, best_offer, market_id, transaction_price, transaction_quantity)
-                        _ = transactions.create(order, best_offer, market_id, transaction_price, transaction_quantity)
-                        assert len(transactions.transactions) > 0
+                        if transactions is not None:
+                            _ = transactions.create(
+                                order, best_offer, market_id, transaction_price, transaction_quantity
+                            )
+                            assert len(transactions.transactions) > 0
                         self._reduce_offer(best_offer, transaction_quantity)
                         logging.info(
                             f"{__class__.__name__}._process_buy pid: {self.pid} order: {order.id} executed "
@@ -260,7 +311,8 @@ class OrderBook(mp.Process):
         logging.debug(f"{__class__.__name__}._process_buy active: {self._active_buy_orders} exit")
 
     def _process_sell(self, order: Order, transactions: Transactions):
-        logging.debug(f"{__class__.__name__}._process_sell {order} tx size: {transactions.size} entry")
+        # logging.debug(f"{__class__.__name__}._process_sell {order} tx size: {transactions.size} entry")
+        logging.debug(f"{__class__.__name__}._process_sell {order} entry")
 
         assert order.side.lower() == "sell"
         assert order.market_id == self._market_id
@@ -275,7 +327,8 @@ class OrderBook(mp.Process):
                     transaction_price = best_bid.price
                     if remaining_quantity > best_bid.quantity:
                         transaction_quantity = best_bid.quantity
-                        _ = transactions.create(best_bid, order, market_id, transaction_price, transaction_quantity)
+                        if transactions is not None:
+                            _ = transactions.create(best_bid, order, market_id, transaction_price, transaction_quantity)
                         self._remove_bid(best_bid)
                         remaining_quantity -= transaction_quantity
                         logging.info(
@@ -288,7 +341,8 @@ class OrderBook(mp.Process):
                         # Find next best offer
                     elif remaining_quantity == best_bid.quantity:
                         transaction_quantity = best_bid.quantity
-                        _ = transactions.create(best_bid, order, market_id, transaction_price, transaction_quantity)
+                        if transactions is not None:
+                            _ = transactions.create(best_bid, order, market_id, transaction_price, transaction_quantity)
                         self._remove_bid(best_bid)
                         logging.info(
                             f"{__class__.__name__}._process_sell pid: {self.pid} order: {order.id} executed "
@@ -300,7 +354,8 @@ class OrderBook(mp.Process):
                         break
                     else:
                         transaction_quantity = remaining_quantity
-                        _ = transactions.create(best_bid, order, market_id, transaction_price, transaction_quantity)
+                        if transactions is not None:
+                            _ = transactions.create(best_bid, order, market_id, transaction_price, transaction_quantity)
                         self._reduce_bid(best_bid, transaction_quantity)
                         logging.info(
                             f"{__class__.__name__}._process_sell pid: {self.pid} order: {order.id} executed "

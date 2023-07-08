@@ -2,10 +2,10 @@ import logging
 import time
 import unittest
 
-from synthetic_exchange.agent import Agent
 from synthetic_exchange.exchange import Exchange
 from synthetic_exchange.market import Market
 from synthetic_exchange.order import Order
+from synthetic_exchange.strategy.agent import Agent
 
 
 class ExchangeTest(unittest.TestCase):

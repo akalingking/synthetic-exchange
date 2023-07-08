@@ -1,4 +1,4 @@
-from .exchange import Exchange
+# from .exchange import Exchange
 from .order import Order
 from .orderbook import OrderBook
 from .transaction import Transaction

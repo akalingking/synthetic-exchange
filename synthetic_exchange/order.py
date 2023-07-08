@@ -18,7 +18,6 @@ class Order:
 
     def __init__(self, **kwargs):
         try:
-            self.id = next(__class__._last_id)
             self.state = __class__.State.Open
             self.market_id = kwargs.get("marketid")
             self.agent_id = kwargs.get("agentid")
@@ -39,9 +38,11 @@ class Order:
             self.remaining = self.quantity
             self.cancel = kwargs.get("cancel", False)
             if self.cancel:
-                self.order_id = kwargs.get("orderId")
-                assert isinstance(self.order_id, int)
-                assert self.order_id > 0
+                self.id = kwargs.get("orderid")
+                assert isinstance(self.id, int)
+                assert self.id > 0
+            else:
+                self.id = next(__class__._last_id)
         except Exception as e:
             logging.error(f"{__class__.__name__}.__init__ exception: {e}")
 

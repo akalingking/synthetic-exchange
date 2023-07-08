@@ -2,3 +2,6 @@ numpy
 scipy
 pandas
 pre-commit
+flask
+flask_restful
+waitress

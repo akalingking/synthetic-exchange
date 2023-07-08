@@ -6,9 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from synthetic_exchange.agent import Agent
-from synthetic_exchange.agents import Agents
 from synthetic_exchange.orderbook import OrderBook
+from synthetic_exchange.strategy.agent import Agent
 from synthetic_exchange.transaction import Transaction, Transactions
 
 
@@ -58,12 +57,12 @@ class Reports:
         axs[0, 1].legend()
 
         # 1. Plot positions
-        assert isinstance(transactions.agents, Agents)
-        assert isinstance(transactions.agents.agents, dict)
-        assert len(transactions.agents.agents) > 0
+        # assert isinstance(transactions.agents, Agents)
+        # assert isinstance(transactions.agents.agents, dict)
+        # assert len(transactions.agents.agents) > 0
 
-        print(f"{__class__.__name__}.show_transactions history_market_agent: {transactions.history_market_agent}")
-        for i, a in transactions.agents.agents.items():
+        # print(f"{__class__.__name__}.show_transactions history_market_agent: {transactions.history_market_agent}")
+        for i, a in transactions.agents.items():
             # data = transactions.history_market_agent(a.id, a.name)
             data = transactions.history_market_agent(a.id, a.name)
             if len(data) > 0:
@@ -79,7 +78,7 @@ class Reports:
             axs[1, 0].legend()
 
         # 3. Plot profit
-        for i, a in transactions.agents.agents.items():
+        for i, a in transactions.agents.items():
             data = transactions.history_market_agent(a.id, a.name)
             assert isinstance(data, list)
             if len(data) > 0:
