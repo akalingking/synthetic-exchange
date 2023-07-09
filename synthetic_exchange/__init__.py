@@ -1,4 +1,5 @@
-# from .exchange import Exchange
+from .exchange import Exchange
+from .market import Market
 from .order import Order
 from .orderbook import OrderBook
 from .transaction import Transaction, Transactions
