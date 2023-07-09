@@ -2,6 +2,7 @@ import logging
 import unittest as ut
 from test.synthetic_exchange.test_agent import AgentTest
 from test.synthetic_exchange.test_exchange import ExchangeTest
+from test.synthetic_exchange.test_exchange_cls import ExchangeClsTest
 from test.synthetic_exchange.test_market import MarketTest
 from test.synthetic_exchange.test_transactions import TransactionsTest
 
@@ -17,6 +18,7 @@ def main():
             MarketTest,
             TransactionsTest,
             ExchangeTest,
+            ExchangeClsTest,
         ]
     ]
     suite = ut.TestSuite(tests)
