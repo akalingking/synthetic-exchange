@@ -1,0 +1,66 @@
+{
+    "exchangeId": 0,
+    "exchange": "exchange_0",
+    "api_enable": true,
+    "markets": [
+        {
+            "marketId": 0,
+            "symbol": "symbol_0",
+            "initialPrice": 100.0,
+            "minPrice": 100.0,
+            "maxPrice": 115.0,
+            "tickSize": 1,
+            "minQuantity": 0.5,
+            "maxQuantity": 1.0,
+            "agents": {
+                "agent_1": {
+                    "type": "randomnormal",
+                    "initialPrice": 50.0,
+                    "minPrice": 50.0,
+                    "maxPrice": 53.0,
+                    "tickSize": 1,
+                    "minQuantity": 1.0,
+                    "maxQuantity": 5.0
+                },
+                "agent_2": {
+                    "type": "randomnormal",
+                    "initialPrice": 50.0,
+                    "minPrice": 50.0,
+                    "maxPrice": 53.0,
+                    "tickSize": 1,
+                    "minQuantity": 1.0,
+                    "maxQuantity": 5.0
+                }
+            }
+        },
+        {
+            "marketId": 1,
+            "symbol": "symbol_1",
+            "initialPrice": 50.0,
+            "minPrice": 50.0,
+            "maxPrice": 53.0,
+            "tickSize": 1,
+            "maxQuantity": 5.0,
+            "agents": {
+                "agent_1": {
+                    "type": "randomnormal",
+                    "initialPrice": 100.0,
+                    "minPrice": 100.0,
+                    "maxPrice": 115.0,
+                    "tickSize": 1,
+                    "minQuantity": 1.0,
+                    "maxQuantity": 5.0
+                },
+                "agent2": {
+                    "type": "randomuniform",
+                    "initialPrice": 100.0,
+                    "minPrice": 100.0,
+                    "maxPrice": 115.0,
+                    "tickSize": 1,
+                    "minQuantity": 1.0,
+                    "maxQuantity": 5.0
+                }
+            }
+        }
+    ]
+}

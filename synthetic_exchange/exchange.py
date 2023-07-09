@@ -12,6 +12,8 @@ from synthetic_exchange.transaction import Transaction, Transactions
 
 class Exchange:
     def __init__(self, config: dict):
+        self._id = config["exchangeId"]
+        self._name = config["exchange"]
         self._config = config
         self._symbol_to_market_id = {}
         self._market_id_to_symbol = {}
@@ -100,6 +102,14 @@ class Exchange:
                 logging.error(
                     f"{__class__.__name__}.__init__ market id: {market_id} symbol: {symbol} error creating market: {market_conf} e: {e}"
                 )
+
+    @property
+    def id(self) -> int:
+        return self._id
+
+    @property
+    def name(self) -> str:
+        return self._name
 
     def start(self):
         for _, market in self._markets.items():
