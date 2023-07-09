@@ -13,7 +13,7 @@
             "minQuantity": 0.5,
             "maxQuantity": 1.0,
             "agents": {
-                "agent_1": {
+                "agent_0": {
                     "type": "randomnormal",
                     "initialPrice": 50.0,
                     "minPrice": 50.0,
@@ -22,7 +22,7 @@
                     "minQuantity": 1.0,
                     "maxQuantity": 5.0
                 },
-                "agent_2": {
+                "agent_1": {
                     "type": "randomnormal",
                     "initialPrice": 50.0,
                     "minPrice": 50.0,
@@ -42,7 +42,7 @@
             "tickSize": 1,
             "maxQuantity": 5.0,
             "agents": {
-                "agent_1": {
+                "agent_0": {
                     "type": "randomnormal",
                     "initialPrice": 100.0,
                     "minPrice": 100.0,
@@ -51,7 +51,7 @@
                     "minQuantity": 1.0,
                     "maxQuantity": 5.0
                 },
-                "agent2": {
+                "agent_1": {
                     "type": "randomuniform",
                     "initialPrice": 100.0,
                     "minPrice": 100.0,

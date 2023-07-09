@@ -2,8 +2,9 @@ import logging
 import unittest as ut
 from test.synthetic_exchange.test_agent import AgentTest
 from test.synthetic_exchange.test_exchange import ExchangeTest
-from test.synthetic_exchange.test_exchange_cls import ExchangeClsTest
+from test.synthetic_exchange.test_exchanges import ExchangesTest
 from test.synthetic_exchange.test_market import MarketTest
+from test.synthetic_exchange.test_markets import MarketsTest
 from test.synthetic_exchange.test_transactions import TransactionsTest
 
 import matplotlib.pyplot as plt
@@ -16,9 +17,10 @@ def main():
         for test in [
             AgentTest,
             MarketTest,
+            MarketsTest,
             TransactionsTest,
             ExchangeTest,
-            ExchangeClsTest,
+            ExchangesTest,
         ]
     ]
     suite = ut.TestSuite(tests)
