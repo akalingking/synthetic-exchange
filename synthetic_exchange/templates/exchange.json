@@ -2,6 +2,7 @@
     "exchangeId": 0,
     "exchange": "exchange_0",
     "api_enable": true,
+    "web_enable": true,
     "markets": [
         {
             "marketId": 0,
@@ -51,7 +52,7 @@
                     "minQuantity": 1.0,
                     "maxQuantity": 5.0
                 },
-                "agent2": {
+                "agent_2": {
                     "type": "randomuniform",
                     "initialPrice": 100.0,
                     "minPrice": 100.0,

@@ -15,9 +15,11 @@ class ExchangeTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._wait = 10 * 3
+        cls._wait = 10 * 30
         cls._config = {
+            "exchangeId": 0,
             "exchange": "sqncrsch",
+            "api_enable": True,
             "markets": [
                 {
                     "marketId": 0,
@@ -28,6 +30,26 @@ class ExchangeTest(unittest.TestCase):
                     "tickSize": 1,
                     "minQuantity": 0.5,
                     "maxQuantity": 1.0,
+                    "agents": {
+                        "agent_1": {
+                            "type": "randomnormal",
+                            "initialPrice": 50.0,
+                            "minPrice": 50.0,
+                            "maxPrice": 53.0,
+                            "tickSize": 1,
+                            "minQuantity": 1.0,
+                            "maxQuantity": 5.0,
+                        },
+                        "agent_2": {
+                            "type": "randomnormal",
+                            "initialPrice": 50.0,
+                            "minPrice": 50.0,
+                            "maxPrice": 53.0,
+                            "tickSize": 1,
+                            "minQuantity": 1.0,
+                            "maxQuantity": 5.0,
+                        },
+                    },
                 },
                 {
                     "marketId": 1,
@@ -38,82 +60,30 @@ class ExchangeTest(unittest.TestCase):
                     "tickSize": 1,
                     "minQuantity": 1.0,
                     "maxQuantity": 5.0,
+                    "agents": {
+                        "agent_1": {
+                            "type": "randomnormal",
+                            "initialPrice": 100.0,
+                            "minPrice": 100.0,
+                            "maxPrice": 115.0,
+                            "tickSize": 1,
+                            "minQuantity": 1.0,
+                            "maxQuantity": 5.0,
+                        },
+                        "agent2": {
+                            "type": "randomuniform",
+                            "initialPrice": 100.0,
+                            "minPrice": 100.0,
+                            "maxPrice": 115.0,
+                            "tickSize": 1,
+                            "minQuantity": 1.0,
+                            "maxQuantity": 5.0,
+                        },
+                    },
                 },
             ],
         }
-        cls._queues = {}
-        cls._agents = {}
-        cls._transactions = {}
-        cls._orderbooks = {}
-        cls._markets = {}
-
-        markets = cls._config["markets"]
-        for market in markets:
-            market_id = market["marketId"]
-            symbol = market["symbol"]
-            initial_price = market["initialPrice"]
-            min_price = market["minPrice"]
-            max_price = market["maxPrice"]
-            tick_size = market["tickSize"]
-            min_quantity = market["minQuantity"]
-            max_quantity = market["maxQuantity"]
-
-            cls._queues[market_id] = mp.Queue(maxsize=100)
-
-            agent_1 = RandomUniform(
-                marketId=market_id,
-                symbol=symbol,
-                minPrice=min_price,
-                maxPrice=max_price,
-                tickSize=tick_size,
-                minQuantity=min_quantity,
-                maxQuantity=max_quantity,
-                queue=cls._queues[market_id],
-                wait=5,
-            )
-            agent_2 = RandomUniform(
-                marketId=market_id,
-                symbol=symbol,
-                minPrice=min_price,
-                maxPrice=max_price,
-                tickSize=tick_size,
-                minQuantity=min_quantity,
-                maxQuantity=max_quantity,
-                queue=cls._queues[market_id],
-                wait=5,
-            )
-            agent_3 = RandomNormal(
-                marketId=market_id,
-                symbol=symbol,
-                initialPrice=initial_price,
-                minQuantity=min_quantity,
-                maxQuantity=max_quantity,
-                queue=cls._queues[market_id],
-                wait=5,
-            )
-
-            cls._agents = {
-                market_id: {
-                    agent_1.id: agent_1,
-                    agent_2.id: agent_2,
-                    agent_3.id: agent_3,
-                }
-            }
-
-            # 3. Create transactions
-            cls._transactions[market_id] = (
-                Transactions(agents=cls._agents[market_id]) if __class__._transactions_on else None
-            )
-
-            # 4. Create OrderBook
-            cls._orderbooks[market_id] = OrderBook(
-                marketId=market_id,
-                symbol=symbol,
-                transactions=cls._transactions[market_id],
-                queue=cls._queues[market_id],
-                wait=5,
-            )
-            cls._markets[market_id] = Market(orderbook=cls._orderbooks[market_id])
+        cls._exchange = Exchange(config=cls._config)
 
     @classmethod
     def tearDownClass(cls):
@@ -126,35 +96,22 @@ class ExchangeTest(unittest.TestCase):
         pass
 
     def test_exchange(self):
-        logging.info(f"{__class__.__name__}.test_market")
+        logging.info(f"{__class__.__name__}.test_exchange")
 
-        for _, market in self._markets.items():
-            market.start()
+        self._exchange.start()
 
         time.sleep(self._wait)
 
-        for _, market in self._markets.items():
-            market.stop()
+        self._exchange.stop()
 
-        # Show all transactions
-        for _, market in self._markets.items():
-            print(f"******{market.symbol} transactions*******")
-            for k, v in market.transactions.transactions.items():
-                print(v)
-            print(f"******{market.symbol} transactions*******")
-        # Show history
-        for _, market in self._markets.items():
-            print(f"******{market.symbol} history*******")
-            for v in market.transactions.history:
-                print(v)
-            print(f"******{market.symbol} history*******")
+        symbols = self._exchange.symbols()
 
-        for _, ob in self._orderbooks.items():
-            print(f"******{ob.symbol} orderbook*******")
-            ob_ = ob.orderbook()
+        for symbol in symbols:
+            print(f"******exchange: {self._exchange.name} symbol: {symbol} orderbook*******")
+            ob_ = self._exchange.orderbook(symbol=symbol)
             print(ob_)
             self.assertTrue(i in ob_ for i in ["symbol", "bids", "asks"])
-            print(f"******{ob.symbol} orderbook*******")
+            print(f"******exchange: {self._exchange.name} symbol: {symbol} orderbook*******")
 
 
 if __name__ == "__main__":
