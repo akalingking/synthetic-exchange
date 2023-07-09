@@ -23,7 +23,7 @@ class ExchangeTest(unittest.TestCase):
             "markets": [
                 {
                     "marketId": 0,
-                    "symbol": "SQNC-RSRCH",
+                    "symbol": "SMBL0",
                     "initialPrice": 100.0,
                     "minPrice": 100.0,
                     "maxPrice": 115.0,
@@ -55,7 +55,7 @@ class ExchangeTest(unittest.TestCase):
                 },
                 {
                     "marketId": 1,
-                    "symbol": "SQNC-TEST",
+                    "symbol": "SMBL1",
                     "initialPrice": 50.0,
                     "minPrice": 50.0,
                     "maxPrice": 53.0,

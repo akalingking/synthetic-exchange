@@ -11,7 +11,7 @@ class AgentTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls._wait = 10 * 3
-        symbols = ["SQNC-RSCH", "SQNC-TEST"]
+        symbols = ["SMBL0", "SMBL1"]
         cls._queue = mp.Queue(maxsize=100)
         agent_1 = RandomUniform(
             marketId=0,

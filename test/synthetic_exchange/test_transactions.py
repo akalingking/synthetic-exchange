@@ -11,7 +11,7 @@ from synthetic_exchange.transaction import Transactions
 class TransactionsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        symbols = ["SQNC-RSCH", "SQNC-TEST"]
+        symbols = ["SMBL0", "SMBL1"]
         # 1. Create queue to pass orders from Agents -> OrderBook
         queue = mp.Queue(maxsize=100)
         # 2. Create Agents to drive the OrderBook

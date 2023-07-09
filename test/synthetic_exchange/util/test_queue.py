@@ -43,7 +43,7 @@ class QueueTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls._wait = 10 * 3
-        cls._symbols = ["SQNC-RSCH", "SQNC-TEST"]
+        cls._symbols = ["SMBL0", "SMBL1"]
         cls._queue = mp.Queue(maxsize=100)
         cls._agents = []
         for i in range(len(cls._symbols)):

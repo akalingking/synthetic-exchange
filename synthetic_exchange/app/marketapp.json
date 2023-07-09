@@ -12,7 +12,7 @@
         "useWsgi": "false"
     },
     "currencies": {
-        "SQNC-RSCH": {
+        "SMBL0": {
             "minPrice": 100,
             "maxPrice": 120,
             "tickSize": 1,
