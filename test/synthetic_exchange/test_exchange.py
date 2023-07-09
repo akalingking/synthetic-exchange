@@ -15,7 +15,7 @@ class ExchangeTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._wait = 10 * 30
+        cls._wait = 10 * 3
         cls._config = {
             "exchange": "sqncrsch",
             "markets": [
@@ -136,22 +136,6 @@ class ExchangeTest(unittest.TestCase):
         for _, market in self._markets.items():
             market.stop()
 
-        """
-        currencies = self._config["currencies"]
-        symbols = [i["symbol"] for i in currencies]
-        exchange_symbols = self._exchange.symbols()
-        logging.info(f"---{__class__.__name__}.test_exchange symbols: {exchange_symbols}")
-        self.assertTrue(len(exchange_symbols) == 2)
-        self.assertTrue(all([i in exchange_symbols for i in symbols]))
-        for symbol in symbols:
-            ob = self._exchange.orderbook(symbol)
-            print(f"******{symbol} orderbook*******")
-            logging.info(f"---{__class__.__name__}.test_exchange {symbol} ob: {ob}")
-            print(f"******{symbol} orderbook*******")
-            self.assertTrue(isinstance(ob, dict))
-            self.assertTrue(all([i in ob for i in ["symbol", "bids", "asks"]]))
-        """
-
         # Show all transactions
         for _, market in self._markets.items():
             print(f"******{market.symbol} transactions*******")
@@ -164,6 +148,13 @@ class ExchangeTest(unittest.TestCase):
             for v in market.transactions.history:
                 print(v)
             print(f"******{market.symbol} history*******")
+
+        for _, ob in self._orderbooks.items():
+            print(f"******{ob.symbol} orderbook*******")
+            ob_ = ob.orderbook()
+            print(ob_)
+            self.assertTrue(i in ob_ for i in ["symbol", "bids", "asks"])
+            print(f"******{ob.symbol} orderbook*******")
 
 
 if __name__ == "__main__":
