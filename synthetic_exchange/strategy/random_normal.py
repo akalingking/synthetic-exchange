@@ -11,7 +11,6 @@ from synthetic_exchange.strategy.agent import Agent
 class RandomNormal(Agent):
     def __init__(self, *args, **kwargs):
         Agent.__init__(self, *args, **kwargs)
-        logging.info(f"{__class__.__name__}.__init__")
         self._market_id = kwargs.get("marketId")
         self._last_price = kwargs.get("initialPrice")
         self._min_quantity = kwargs.get("minQuantity")

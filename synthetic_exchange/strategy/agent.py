@@ -8,7 +8,9 @@ class Agent(Application):
     _last_id = itertools.count()
 
     def __init__(self, *args, **kwargs):
-        self._id = next(__class__._last_id)
+        self._id = kwargs.get("agentId", None)
+        if self._id is None:
+            self._id = next(__class__._last_id)
         Application.__init__(self, *args, **kwargs)
         self._marketid = kwargs.get("marketId")
         self._symbol = kwargs.get("symbol")

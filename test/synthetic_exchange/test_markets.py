@@ -62,8 +62,21 @@ class MarketsTest(unittest.TestCase):
 
             cls._queues[market_id] = mp.Queue(maxsize=100)
 
+            agent_0 = RandomUniform(
+                marketId=market_id,
+                agentId=0,
+                symbol=symbol,
+                minPrice=min_price,
+                maxPrice=max_price,
+                tickSize=tick_size,
+                minQuantity=min_quantity,
+                maxQuantity=max_quantity,
+                queue=cls._queues[market_id],
+                wait=5,
+            )
             agent_1 = RandomUniform(
                 marketId=market_id,
+                agentId=1,
                 symbol=symbol,
                 minPrice=min_price,
                 maxPrice=max_price,
@@ -73,19 +86,9 @@ class MarketsTest(unittest.TestCase):
                 queue=cls._queues[market_id],
                 wait=5,
             )
-            agent_2 = RandomUniform(
+            agent_2 = RandomNormal(
                 marketId=market_id,
-                symbol=symbol,
-                minPrice=min_price,
-                maxPrice=max_price,
-                tickSize=tick_size,
-                minQuantity=min_quantity,
-                maxQuantity=max_quantity,
-                queue=cls._queues[market_id],
-                wait=5,
-            )
-            agent_3 = RandomNormal(
-                marketId=market_id,
+                agentId=2,
                 symbol=symbol,
                 initialPrice=initial_price,
                 minQuantity=min_quantity,
@@ -96,9 +99,9 @@ class MarketsTest(unittest.TestCase):
 
             cls._agents = {
                 market_id: {
+                    agent_0.id: agent_0,
                     agent_1.id: agent_1,
                     agent_2.id: agent_2,
-                    agent_3.id: agent_3,
                 }
             }
 

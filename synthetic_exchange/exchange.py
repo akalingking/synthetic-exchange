@@ -47,6 +47,7 @@ class Exchange:
                 agents_conf: dict = market_conf["agents"]
                 for _, agent_conf in agents_conf.items():
                     try:
+                        agent_id = agent_conf["agentId"]
                         type_ = agent_conf["type"]
                         initial_price = agent_conf["initialPrice"]
                         min_price = agent_conf["minPrice"]
@@ -57,6 +58,7 @@ class Exchange:
                         if type_.lower() == "randomnormal":
                             a = RandomNormal(
                                 marketId=market_id,
+                                agentId=agent_id,
                                 symbol=symbol,
                                 initialPrice=initial_price,
                                 minPrice=min_price,
@@ -71,6 +73,7 @@ class Exchange:
                         elif type_.lower() == "randomuniform":
                             a = RandomUniform(
                                 marketId=market_id,
+                                agentId=agent_id,
                                 symbol=symbol,
                                 initialPrice=initial_price,
                                 minPrice=min_price,

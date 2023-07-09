@@ -32,7 +32,8 @@ class ExchangesTest(unittest.TestCase):
                     "minQuantity": 0.5,
                     "maxQuantity": 1.0,
                     "agents": {
-                        "agent_1": {
+                        "agent_0": {
+                            "agentId": 0,
                             "type": "randomnormal",
                             "initialPrice": 50.0,
                             "minPrice": 50.0,
@@ -41,7 +42,8 @@ class ExchangesTest(unittest.TestCase):
                             "minQuantity": 1.0,
                             "maxQuantity": 5.0,
                         },
-                        "agent_2": {
+                        "agent_1": {
+                            "agentId": 1,
                             "type": "randomnormal",
                             "initialPrice": 50.0,
                             "minPrice": 50.0,
@@ -62,7 +64,8 @@ class ExchangesTest(unittest.TestCase):
                     "minQuantity": 1.0,
                     "maxQuantity": 5.0,
                     "agents": {
-                        "agent_1": {
+                        "agent_0": {
+                            "agentId": 0,
                             "type": "randomnormal",
                             "initialPrice": 100.0,
                             "minPrice": 100.0,
@@ -71,7 +74,8 @@ class ExchangesTest(unittest.TestCase):
                             "minQuantity": 1.0,
                             "maxQuantity": 5.0,
                         },
-                        "agent_2": {
+                        "agent_1": {
+                            "agentId": 1,
                             "type": "randomuniform",
                             "initialPrice": 100.0,
                             "minPrice": 100.0,
