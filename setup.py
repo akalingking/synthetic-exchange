@@ -23,11 +23,14 @@ if os.environ.get("WITHOUT_CYTHON_OPTIMIZATIONS"):
 
 
 def get_version():
+    version = datetime.datetime.now().strftime("%Y%m%d")
     try:
-        with open("{project_dir}/VERSION", "r") as f:
-            return f.read().strip()
+        fname = f"./{project_dir}/VERSION"
+        with open(fname, "r") as f:
+            version = f.read().strip()
     except IOError:
-        return datetime.datetime.now().strftime("%Y%m%d")
+        print(f"error reading file: {fname}")
+    return version
 
 
 def get_readme():
@@ -61,7 +64,6 @@ def main():
     version = get_version()
     packages = find_packages(include=[project_dir, f"{project_dir}.*"])
     package_data = {
-        # "strategy-builder": [
         project_name: [
             f"{project_dir}/**/*.cpp",
             f"{project_dir}/**/*.pyx",
@@ -117,7 +119,7 @@ def main():
         long_description_content_type="text/markdown",
         url=f"https://github.com/akalingking/{project_name}",
         author="Ariel Kalingking",
-        author_email="akalingking@sequenceresearch.com",
+        author_email="akalingking@gmail.com",
         license="Private",
         classifiers=[
             "Programming Language :: Python :: 3",
@@ -134,7 +136,8 @@ def main():
         ),
         include_dirs=[np.get_include()],
         scripts=[
-            f"bin/{project_name}.py",
+            # f"bin/{project_name}.py",
+            "bin/market-app",
         ],
         cmdclass={"build_ext": BuildExt},
     )
