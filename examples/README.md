@@ -5,7 +5,6 @@
 ```
 Make sure library is installed by typing: 'python setup.py install'
 
-then
+python -m examples.exchanges
 
-python <example>.py
 ```
