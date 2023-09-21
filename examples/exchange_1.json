@@ -1,0 +1,71 @@
+{
+    "exchangeId": 1,
+    "exchange": "exchange_1",
+    "api_enable": "true",
+    "markets": [
+        {
+            "marketId": 0,
+            "symbol": "SMBL1",
+            "initialPrice": 100.0,
+            "minPrice": 100.0,
+            "maxPrice": 115.0,
+            "tickSize": 1,
+            "minQuantity": 0.5,
+            "maxQuantity": 1.0,
+            "agents": {
+                "agent_0": {
+                    "agentId": 0,
+                    "type": "randomnormal",
+                    "initialPrice": 50.0,
+                    "minPrice": 50.0,
+                    "maxPrice": 53.0,
+                    "tickSize": 1,
+                    "minQuantity": 1.0,
+                    "maxQuantity": 5.0
+                },
+                "agent_1": {
+                    "agentId": 1,
+                    "type": "randomnormal",
+                    "initialPrice": 50.0,
+                    "minPrice": 50.0,
+                    "maxPrice": 53.0,
+                    "tickSize": 1,
+                    "minQuantity": 1.0,
+                    "maxQuantity": 5.0
+                }
+            }
+        },
+        {
+            "marketId": 1,
+            "symbol": "SMBL2",
+            "initialPrice": 50.0,
+            "minPrice": 50.0,
+            "maxPrice": 53.0,
+            "tickSize": 1,
+            "minQuantity": 1.0,
+            "maxQuantity": 5.0,
+            "agents": {
+                "agent_0": {
+                    "agentId": 0,
+                    "type": "randomnormal",
+                    "initialPrice": 100.0,
+                    "minPrice": 100.0,
+                    "maxPrice": 115.0,
+                    "tickSize": 1,
+                    "minQuantity": 1.0,
+                    "maxQuantity": 5.0
+                },
+                "agent_1": {
+                    "agentId": 1,
+                    "type": "randomuniform",
+                    "initialPrice": 100.0,
+                    "minPrice": 100.0,
+                    "maxPrice": 115.0,
+                    "tickSize": 1,
+                    "minQuantity": 1.0,
+                    "maxQuantity": 5.0
+                }
+            }
+        }
+    ]
+}
