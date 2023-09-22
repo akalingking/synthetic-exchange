@@ -15,7 +15,7 @@ class ExchangesTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._wait = 10 * 10
+        cls._wait = 30 * 1
         # Sample exchange config
         cls._exchange_0_config = {
             "exchangeId": 0,

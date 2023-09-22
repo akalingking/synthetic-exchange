@@ -137,7 +137,6 @@ def main():
         include_dirs=[np.get_include()],
         scripts=[
             # f"bin/{project_name}.py",
-            "bin/market-app",
         ],
         cmdclass={"build_ext": BuildExt},
     )

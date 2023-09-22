@@ -90,7 +90,7 @@ class Transactions:
         transaction = Transaction(buyOrder, sellOrder, marketId, price, quantity)
 
         # Register order agents
-        logging.info(
+        logging.debug(
             f"{__class__.__name__}.create history: {self._history_market_agent} "
             f"bid: {buyOrder.agent_id} sid: {sellOrder.agent_id}"
         )
@@ -132,7 +132,7 @@ class Transactions:
 
         # Register transaction
         self._transactions[transaction.id] = transaction
-        logging.info(f"{__class__.__name__}.create {transaction} size: {len(self._transactions)}")
+        logging.debug(f"{__class__.__name__}.create {transaction} size: {len(self._transactions)}")
         return transaction
 
     def remove(self, transactionId):
@@ -157,9 +157,9 @@ class Transactions:
                 if agentName in agents:
                     retval = agents[agentName]
                 else:
-                    logging.info(f"{__class__.__name__}.history_market_agent missing agent: {agentName}")
+                    logging.debug(f"{__class__.__name__}.history_market_agent missing agent: {agentName}")
             else:
-                logging.info(f"{__class__.__name__}.history_market_agent missing agent id: {agentId}")
+                logging.debug(f"{__class__.__name__}.history_market_agent missing agent id: {agentId}")
         else:
             logging.warning(f"{__class__.__name__}.history_market_agent empty history market agent")
         return retval

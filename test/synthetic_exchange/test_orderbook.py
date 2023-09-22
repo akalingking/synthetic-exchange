@@ -14,7 +14,7 @@ class OrderBookTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._wait = 10 * 20
+        cls._wait = 30 * 1
         symbols = ["SMBL0", "SMBL1"]
         # 1. Order queue from agents -> orderbook
         cls._queue = mp.Queue(maxsize=100)

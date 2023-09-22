@@ -18,7 +18,7 @@ class WebApplication(Application):
     def __init__(self, *args, **kwargs):
         templates_dir = os.path.dirname(os.path.realpath(__file__)) + "/templates"
         static_dir = os.path.dirname(os.path.realpath(__file__)) + "/static"
-        logging.info(f"{__class__.__name__} templates dir: '{templates_dir}' static: '{static_dir}'")
+        logging.debug(f"{__class__.__name__} templates dir: '{templates_dir}' static: '{static_dir}'")
         self._flask = Flask(__class__._app_name, template_folder=templates_dir, static_folder=static_dir)
         self._api = Api(self._flask)
 
@@ -74,7 +74,7 @@ class WebApplication(Application):
         return self._flask
 
     def run(self):
-        logging.info(f"{__class__.__name__}.run flask STARTING...")
+        logging.debug(f"{__class__.__name__}.run flask STARTING...")
 
         with self._lock:
             self._run = True
@@ -84,8 +84,6 @@ class WebApplication(Application):
             if self._run:
                 self._lock.release()
                 try:
-                    # TODO: This is not stoppping after self cleanup, how to stop flask programmatically?
-                    # self._flask.before_first_request(None)
                     self._flask.run(host=self._host, port=self._port, threaded=True, debug=self._debug)
                 except KeyboardInterrupt:
                     break
@@ -96,4 +94,4 @@ class WebApplication(Application):
             with self._lock:
                 if not self._run:
                     break
-        logging.info(f"{__class__.__name__}.run flask STOPPED!")
+        logging.debug(f"{__class__.__name__}.run flask STOPPED!")

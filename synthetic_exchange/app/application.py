@@ -30,7 +30,7 @@ class Application(mp.Process):
                     break  # signalled
 
     def terminate(self):
-        logging.info(f"{self.__class__.__name__}.terminate entry")
+        logging.debug(f"{self.__class__.__name__}.terminate entry")
         try:
             self._cond.acquire()
             self._run.value = 0
@@ -38,9 +38,10 @@ class Application(mp.Process):
             self._cond.release()
         except Exception as e:
             logging.error(f"{self.__class__.__name__}.terminate e: {e}")
-        logging.info(f"{self.__class__.__name__}.terminate exit")
+        logging.debug(f"{self.__class__.__name__}.terminate exit")
 
     def run(self):
+        logging.debug(f"{__class__.__name__}.run start...")
         while True:
             try:
                 self._lock.acquire()
@@ -52,7 +53,7 @@ class Application(mp.Process):
                         logging.error(f"{self.__class__.__name__}.run while doing work e: {e}")
 
                     with self._lock:
-                        logging.info(f"{self.__class__.__name__}.run wait for {self._wait} seconds...")
+                        logging.debug(f"{self.__class__.__name__}.run wait for {self._wait} seconds...")
                         if not self._cond.wait(self._wait):
                             continue
                         else:
@@ -72,7 +73,7 @@ class Application(mp.Process):
         with self._stop_lock:
             self._stop_cond.notify_all()
 
-        logging.info(f"{__class__.__name__}.run STOPPED!")
+        logging.debug(f"{__class__.__name__}.run stopped!")
 
     def _do_work(self):
         raise NotImplementedError()

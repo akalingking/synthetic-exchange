@@ -35,7 +35,7 @@ class TransactionsTest(unittest.TestCase):
         }
         # 3. Create transaction to record buy,sell transactions
         cls._transactions = Transactions(agents=cls._agents)
-        cls._wait = 30
+        cls._wait = 30 * 1
 
     @classmethod
     def tearDownClass(cls):

@@ -1,9 +1,6 @@
 #!/bin/bash
-
 cd $(dirname $0)
 project_name="synthetic-exchange"
-
-# Compatibility logic for older Anaconda versions.
 if [ "${CONDA_EXE} " == " " ]; then
     CONDA_EXE=$((find /opt/conda/bin/conda || find ~/anaconda3/bin/conda || \
         find /usr/local/anaconda3/bin/conda || find ~/miniconda3/bin/conda  || \
@@ -15,14 +12,15 @@ if [ "${CONDA_EXE}_" == "_" ]; then
     exit 1
 fi
 CONDA_BIN=$(dirname ${CONDA_EXE})
-MACOS_ENV=setup/environment.yml
+MACOS_ENV=""
+WIN64_ENV=""
 LINUX_ENV=setup/environment-linux.yml
-WIN64_ENV=setup/environment-win64.yml
-ENV_FILE=$MACOS_ENV
+ENV_FILE=$LINUX_ENV
 if uname | egrep -qe "Linux"; then
     ENV_FILE=$LINUX_ENV
-elif uname | egrep -qe "MINGW64"; then
-    ENV_FILE=$WIN64_ENV
+else
+	echo "OS env not supported"
+	exit 1
 fi
 if ${CONDA_EXE} env list | egrep -qe "^${project_name}"; then
     ${CONDA_EXE} env update -f $ENV_FILE
@@ -30,7 +28,5 @@ else
     ${CONDA_EXE} env create -f $ENV_FILE
 fi
 source "${CONDA_BIN}/activate" ${project_name}
-# For some reason, this needs to be installed outside of the environment file,
-# or it'll give you the graphviz install error.
 pip install objgraph
 pre-commit install

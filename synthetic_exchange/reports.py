@@ -94,12 +94,12 @@ class Reports:
             plt.show()
         else:
             fname = "data/transactions.pdf"
-            logging.info(f"{__class__.__name__}.show_transactions saving to {fname}")
+            logging.debug(f"{__class__.__name__}.show_transactions saving to {fname}")
             plt.savefig(fname)
             plt.close(fig)
 
     def show_orderbook(self, ob: OrderBook, depth: int = 10):
-        logging.info(f"{__class__.__name__}.show_orderbook entry")
+        logging.debug(f"{__class__.__name__}.show_orderbook entry")
         width = len("0       Bert    Buy     33      5")
         assert isinstance(ob.active_sell_orders, mp.managers.ListProxy)
         assert isinstance(ob.active_buy_orders, mp.managers.ListProxy)
@@ -124,4 +124,4 @@ class Reports:
             logging.warning(f"{__class__.__name__}.show_orderbook no active buy orders")
         print(width * 1 * "*" + "Active Buy Orders" + width * 1 * "*")
         print(" ")
-        logging.info(f"{__class__.__name__}.show_orderbook exit")
+        logging.debug(f"{__class__.__name__}.show_orderbook exit")

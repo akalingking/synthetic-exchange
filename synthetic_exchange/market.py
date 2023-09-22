@@ -63,7 +63,7 @@ class Market:
 
     @staticmethod
     def _order_event(event: dict):
-        logging.info(f"{__class__.__name__}._order_event: {event}")
+        logging.debug(f"{__class__.__name__}._order_event: {event}")
         assert isinstance(event, dict)
         if "marketid" in event:
             market_id = event.get("marketid")
@@ -139,20 +139,20 @@ class Market:
         self._agents.add(agents)
 
     def show_transactions(self):
-        logging.info(f"{__class__.__name__}.show_transactions entry")
+        logging.debug(f"{__class__.__name__}.show_transactions entry")
         try:
             self._reports.show_transactions(self._orderbook.transactions)
         except Exception as e:
             logging.error(f"{__class__.__name__}.show_transactions e: {e}")
-        logging.info(f"{__class__.__name__}.show_transactions exit")
+        logging.debug(f"{__class__.__name__}.show_transactions exit")
 
     def show_orderbook(self, depth: int = 10):
-        logging.info(f"{__class__.__name__}.show_orderbook entry")
+        logging.debug(f"{__class__.__name__}.show_orderbook entry")
         try:
             self._reports.show_orderbook(self._orderbook, depth)
         except Exception as e:
             logging.error(f"{__class__.__name__}.show_orderbook e: {e}")
-        logging.info(f"{__class__.__name__}.show_orderbook exit")
+        logging.debug(f"{__class__.__name__}.show_orderbook exit")
 
     def get_last_price(self):
         retval = None
