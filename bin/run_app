@@ -1,0 +1,2 @@
+#!/usr/bin/bash
+python -m synthetic_exchange.app.exchange_app
