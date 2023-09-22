@@ -1,4 +1,4 @@
-# Synthetic Exchange Examples #A
+# Synthetic Exchange Examples
 
 ## Howto ##
 
