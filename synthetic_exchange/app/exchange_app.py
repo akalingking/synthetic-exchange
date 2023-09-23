@@ -11,12 +11,7 @@ from synthetic_exchange.exchange import Exchange
 from synthetic_exchange.util import get_config_from_file
 
 
-class Constants:
-	config_file = f"synthetic_exchange/app/application.json"
-	#exchange_config_files = [
-	#	"synthetic_exchange/app/conf/exchange_0.json",
-	#	"synthetic_exchange/app/conf/exchange_1.json",
-	#]
+config_file = f"synthetic_exchange/app/application.json"
 
 
 application = None
@@ -48,7 +43,7 @@ class ExchangeApplication(Application):
 			for exchange in self._exchanges.values():
 				symbols = exchange.symbols()
 				for symbol in symbols:
-					logging.info(">>>ExchangeApplication.do_work exchange: {} symbol: {} bid: {} ask: {}".format(
+					logging.info("ExchangeApplication.do_work exchange: {} symbol: {} bid: {} ask: {}".format(
 						exchange.name, symbol, exchange.best_bid(symbol), exchange.best_ask(symbol)
 					))
 		except Exception as e:
@@ -68,7 +63,7 @@ def main():
 	signal.signal(signal.SIGTERM, signal_handler)
 	signal.signal(signal.SIGUSR1, signal_handler)
 
-	config = get_config_from_file(Constants.config_file)
+	config = get_config_from_file(config_file)
 	if config is not None:
 		app_conf = config["application"]
 		log_level_name = app_conf.get("logLevel", "info").upper()
@@ -107,7 +102,7 @@ def main():
 			for exchange in exchanges:
 				exchange.stop()
 	else:
-		print(f"{Constants.config_file} not found!")
+		print(f"{config_file} not found!")
 	print(f"{sys.argv[0]} stopped!")
 
 

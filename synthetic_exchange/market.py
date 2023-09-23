@@ -4,11 +4,9 @@ import multiprocessing as mp
 import operator
 import random
 from typing import List
-
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
 from synthetic_exchange.order import Order
 from synthetic_exchange.orderbook import OrderBook
 from synthetic_exchange.reports import Reports
@@ -17,9 +15,6 @@ from synthetic_exchange.transaction import Transaction, Transactions
 
 
 class Market:
-    """Synthetic exchange generating orderbook for one instrument."""
-
-    # _last_id = itertools.count()
     _markets = {}
 
     def __init__(

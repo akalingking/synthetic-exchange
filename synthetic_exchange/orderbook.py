@@ -2,7 +2,6 @@ import enum
 import logging
 import multiprocessing as mp
 import operator
-
 from synthetic_exchange.app import Application
 from synthetic_exchange.order import Order
 from synthetic_exchange.transaction import Transaction, Transactions
@@ -17,7 +16,6 @@ class OrderEvent(enum.Enum):
 
 class OrderEvents:
     """todo: Send dict or order type, update position & strategy classes"""
-
     def __init__(self):
         self.partial_fill = Event()
         self.fill = Event()
