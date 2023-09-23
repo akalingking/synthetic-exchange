@@ -1,6 +1,6 @@
 # Synthetic Exchange #
 
-Generate orderbooks for testing market making strategies
+Agent based generated timeseries data for simulating market conditions.
 
 ## Install ##
 ```
