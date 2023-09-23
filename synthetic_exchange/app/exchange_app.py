@@ -58,7 +58,7 @@ class ExchangeApplication(Application):
 
 def main():
 	print(f"{sys.argv[0]} starting...")
-	global application
+	global application, config_file
 	signal.signal(signal.SIGINT, signal_handler)
 	signal.signal(signal.SIGTERM, signal_handler)
 	signal.signal(signal.SIGUSR1, signal_handler)
@@ -84,7 +84,7 @@ def main():
 			logging.basicConfig(
 				format="%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s",
 				datefmt="%H:%M:%S",
-				level=logging.DEBUG,
+				level=log_level,
 			)
 
 		exchanges = {}
