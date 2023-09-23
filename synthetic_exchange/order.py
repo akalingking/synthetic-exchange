@@ -9,10 +9,10 @@ import multiprocessing as mp
 class Order:
     class State(enum.Enum):
         Open = 0
-        PartialyFilled = 1
-        Filled = 2
-        Cancelled = 3
-        Failed = 4
+        PartialFill = 1
+        Fill = 2
+        Cancel = 3
+        Fail = 4
 
     _last_id = itertools.count()
 

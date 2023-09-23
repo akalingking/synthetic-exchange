@@ -22,28 +22,28 @@ class Application(mp.Process):
 		self.terminate()
 
 	def wait(self):
-		self._lock.acquire()
-		if self._run.value == 1:
-			self._lock.release()
-			while True:
+		logging.debug(f"{self.__class__.__name__}.wait entry")
+		while True:
+			if self._run.value == 1:
 				with self._stop_lock:
 					if not self._stop_cond.wait(self._wait):
+						# logging.debug(f"{self.__class__.__name__}.wait timeout...")
 						continue  # timeout
 					else:
+						# logging.debug(f"{self.__class__.__name__}.wait signalled...")
 						break  # signalled
-		else:
-			self._lock.release()
+			else:
+				break
+		logging.debug(f"{self.__class__.__name__}.wait exit")
 			
-
 	def terminate(self):
 		logging.debug(f"{self.__class__.__name__}.terminate entry")
 		try:
-			self._lock.acquire()
 			if self._run.value == 1:
 				self._run.value = 0
-				# logging.debug(f"{self.__class__.__name__}.terminate run: {self._run.value}")
-				self._cond.notify_all()
-			self._lock.release()
+				logging.debug(f"{self.__class__.__name__}.terminate run: {self._run.value}")
+				with self._lock:
+					self._cond.notify_all
 		except Exception as e:
 			logging.error(f"{self.__class__.__name__}.terminate e: {e}")
 		logging.debug(f"{self.__class__.__name__}.terminate exit")
@@ -52,28 +52,24 @@ class Application(mp.Process):
 		logging.debug(f"{__class__.__name__}.run start...")
 		while True:
 			try:
-				self._lock.acquire()
 				if self._run.value == 1:
-					self._lock.release()
 					try:
 						self._do_work()
 					except Exception as e:
 						logging.error(f"{self.__class__.__name__}.run while doing work e: {e}")
-					self._lock.acquire()
 					if self._run.value == 0:
-						self._lock.release()
 						break
 					else:
+						self._lock.acquire()
 						if not self._cond.wait(self._wait):
-							#logging.warning(f"{self.__class__.__name__}.run wait timeout, run: {self._run.value} continue..")
+							# logging.debug(f"{self.__class__.__name__}.run wait timeout, run: {self._run.value} continue..")
 							self._lock.release()
 						else:
-							logging.warning(f"{self.__class__.__name__}.run wait interrupt run: {self._run.value}")
+							# logging.debug(f"{self.__class__.__name__}.run wait interrupt run: {self._run.value}")
 							self._lock.release()
 							break
 				else:
 					logging.warning(f"{self.__class__.__name__}.run stopped")
-					self._lock.release()
 					break
 			except KeyboardInterrupt:
 				os._exit(1)
