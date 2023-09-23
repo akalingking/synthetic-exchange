@@ -6,7 +6,7 @@ import random
 import time
 import unittest
 
-from synthetic_exchange.app.application import Application
+from synthetic_exchange.util import Application
 
 _sides = ["BUY", "SELL"]
 

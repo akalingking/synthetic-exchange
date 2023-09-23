@@ -2,10 +2,9 @@ import enum
 import logging
 import multiprocessing as mp
 import operator
-from synthetic_exchange.app import Application
 from synthetic_exchange.order import Order
 from synthetic_exchange.transaction import Transaction, Transactions
-from synthetic_exchange.util import Event
+from synthetic_exchange.util import Event, Application
 
 
 class OrderEvent(enum.Enum):

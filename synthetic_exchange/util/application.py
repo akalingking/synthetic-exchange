@@ -22,19 +22,26 @@ class Application(mp.Process):
 		self.terminate()
 
 	def wait(self):
-		while True:
-			with self._stop_lock:
-				if not self._stop_cond.wait(self._wait):
-					continue  # timeout
-				else:
-					break  # signalled
+		self._lock.acquire()
+		if self._run.value == 1:
+			self._lock.release()
+			while True:
+				with self._stop_lock:
+					if not self._stop_cond.wait(self._wait):
+						continue  # timeout
+					else:
+						break  # signalled
+		else:
+			self._lock.release()
+			
 
 	def terminate(self):
 		logging.debug(f"{self.__class__.__name__}.terminate entry")
 		try:
 			self._lock.acquire()
-			if self._run == 1:
+			if self._run.value == 1:
 				self._run.value = 0
+				# logging.debug(f"{self.__class__.__name__}.terminate run: {self._run.value}")
 				self._cond.notify_all()
 			self._lock.release()
 		except Exception as e:
@@ -46,28 +53,30 @@ class Application(mp.Process):
 		while True:
 			try:
 				self._lock.acquire()
-				if self._run.value:
+				if self._run.value == 1:
 					self._lock.release()
 					try:
 						self._do_work()
 					except Exception as e:
 						logging.error(f"{self.__class__.__name__}.run while doing work e: {e}")
-
-					with self._lock:
-						logging.debug(f"{self.__class__.__name__}.run wait for {self._wait} seconds...")
+					self._lock.acquire()
+					if self._run.value == 0:
+						self._lock.release()
+						break
+					else:
 						if not self._cond.wait(self._wait):
-							continue
+							#logging.warning(f"{self.__class__.__name__}.run wait timeout, run: {self._run.value} continue..")
+							self._lock.release()
 						else:
-							logging.warning(f"{self.__class__.__name__}.run wait interrupt run: {self._run}")
+							logging.warning(f"{self.__class__.__name__}.run wait interrupt run: {self._run.value}")
+							self._lock.release()
+							break
 				else:
+					logging.warning(f"{self.__class__.__name__}.run stopped")
 					self._lock.release()
 					break
-
-				with self._lock:
-					if not self._run.value:
-						break
 			except KeyboardInterrupt:
-				os._exit()
+				os._exit(1)
 			except Exception as e:
 				logging.error(f"{__class__.__name__}.run exception: {e}")
 

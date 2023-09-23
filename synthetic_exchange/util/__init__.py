@@ -2,8 +2,8 @@ import json
 import linecache
 import os
 import tracemalloc
-
 from .observer import Event, ProcessEvent
+from .application import Application
 
 
 def _trace_top_malloc(snapshot, key_type="lineno", limit=5):

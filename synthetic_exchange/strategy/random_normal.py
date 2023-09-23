@@ -50,7 +50,7 @@ class RandomNormal(Agent):
             pass
         elif event_type == "fill":
             pass
-        elif event_type == "partially_filled":
+        elif event_type == "partial_fill":
             pass
         else:
             logging.warning(f"{__class__.__name__}.orderbook_event unhandled event: {event_type}")

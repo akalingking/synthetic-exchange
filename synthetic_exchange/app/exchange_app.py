@@ -5,13 +5,12 @@ import signal
 import sys
 import time
 from synthetic_exchange import util
-from synthetic_exchange.app.application import Application
 from synthetic_exchange.app.web.application import WebApplication
 from synthetic_exchange.exchange import Exchange
-from synthetic_exchange.util import get_config_from_file
+from synthetic_exchange.util import Application, get_config_from_file
 
 
-config_file = f"synthetic_exchange/app/application.json"
+config_file = f"synthetic_exchange/app/conf/application.json"
 
 
 application = None

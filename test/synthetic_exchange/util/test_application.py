@@ -2,7 +2,7 @@ import logging
 import time
 import unittest
 
-from synthetic_exchange.app import Application
+from synthetic_exchange.util import Application
 
 
 class TestApplication(Application):

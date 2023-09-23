@@ -5,7 +5,7 @@ import random
 import time
 import unittest
 
-from synthetic_exchange.app import Application
+from synthetic_exchange.util import Application
 
 
 class Producer(Application):
@@ -29,7 +29,7 @@ class Consumer(Application):
         logging.debug(f"{__class__.__name__}._do_work data: {self._data}")
 
 
-class ApplicationTest(unittest.TestCase):
+class MultiApplicationTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls._wait = 15

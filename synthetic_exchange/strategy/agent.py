@@ -1,7 +1,6 @@
 import itertools
 import multiprocessing as mp
-
-from synthetic_exchange.app import Application
+from synthetic_exchange.util import Application
 
 
 class Agent(Application):

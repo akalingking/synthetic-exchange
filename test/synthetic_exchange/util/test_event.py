@@ -7,8 +7,7 @@ import random
 import time
 import unittest
 
-from synthetic_exchange.app import Application
-from synthetic_exchange.util import Event, ProcessEvent
+from synthetic_exchange.util import Event, ProcessEvent, Application
 
 
 class Subject(Application):

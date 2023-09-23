@@ -59,6 +59,9 @@ class AgentTest(unittest.TestCase):
         for agent in self._agents:
             agent.stop()
 
+        for agent in self._agents:
+            agent.wait()
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
