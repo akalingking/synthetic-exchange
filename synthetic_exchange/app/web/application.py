@@ -7,7 +7,7 @@ from flask import Flask, render_template, request
 from flask_restful import Api
 from waitress import serve
 
-from synthetic_exchange.app.application import Application
+from synthetic_exchange.util import Application
 from synthetic_exchange.app.web.api.orderbook_endpoint import OrderbookEndpoint
 from synthetic_exchange.market import Market
 
