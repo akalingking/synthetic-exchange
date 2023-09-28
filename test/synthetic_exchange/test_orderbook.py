@@ -15,9 +15,12 @@ class OrderBookTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls._wait = 10 * 3
+
         symbols = ["SMBL0", "SMBL1"]
+
         # 1. Order queue from agents -> orderbook
         cls._queue = mp.Queue(maxsize=100)
+
         # 2. Create agents
         agent_1 = RandomUniform(
             marketId=0,
@@ -29,6 +32,7 @@ class OrderBookTest(unittest.TestCase):
             maxQuantity=200,
             queue=cls._queue,
             wait=5,
+			verbose=False,
         )
         agent_2 = RandomUniform(
             marketId=0,
@@ -40,9 +44,17 @@ class OrderBookTest(unittest.TestCase):
             maxQuantity=200,
             queue=cls._queue,
             wait=5,
+			verbose=False,
         )
         agent_3 = RandomNormal(
-            marketId=0, symbol=symbols[0], initialPrice=100, minQuantity=100, maxQuantity=200, queue=cls._queue, wait=5
+            marketId=0,
+			symbol=symbols[0],
+			initialPrice=100,
+			minQuantity=100,
+			maxQuantity=200,
+			queue=cls._queue,
+			wait=5,
+			verbose=False,
         )
 
         cls._agents = {
@@ -83,6 +95,7 @@ class OrderBookTest(unittest.TestCase):
 
         for _, agent in self._agents.items():
             agent.start()
+
         self._orderbook.start()
 
         time.sleep(self._wait)
