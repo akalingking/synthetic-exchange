@@ -20,7 +20,6 @@ from synthetic_exchange.detail.event_listener import EventListener
 from synthetic_exchange.detail.event_listener cimport EventListener
 
 
-
 cdef class PubSub:
 	ADD_LISTENER_GC_PROBABILITY = 0.005
 
@@ -125,8 +124,6 @@ cdef class PubSub:
 		if it == self._events.end():
 			return
 
-		# It is extremely important that this set of listeners is a C++ copy - because listeners are allowed to call
-		# c_remove_listener(), which breaks the iterator if we're using the underlying set.
 		listeners = deref(it).second
 		for pyref in listeners:
 			listener_weafref = <object>pyref.get()
@@ -134,7 +131,7 @@ cdef class PubSub:
 			try:
 				typed_listener.c_set_event_info(event_tag, self)
 				typed_listener.c_call(arg)
-			except Exception:
-				logging.error(f"Unexpected error while processing event {event_tag}.", exc_info=True)
+			except Exception as e:
+				logging.error(f"PubSub.c_trigger_event event: {event_tag} e: {e}")
 			finally:
 				typed_listener.c_set_event_info(0, None)

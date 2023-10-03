@@ -36,7 +36,6 @@ class ClockTest(unittest.TestCase):
 		self.assertEqual(self.tick_size, self.clock_backtest.tick_size)
 
 	def test_child_iterators(self):
-		# Tests child_iterators property after initialization. See also test_add_iterator
 		self.assertEqual(0, len(self.clock_realtime.child_iterators))
 		self.assertEqual(0, len(self.clock_backtest.child_iterators))
 
@@ -44,8 +43,8 @@ class ClockTest(unittest.TestCase):
 		self.assertEqual(self.backtest_start_timestamp, self.clock_backtest.current_timestamp)
 		self.assertAlmostEqual((self.realtime_start_timestamp // self.tick_size) * self.tick_size, self.clock_realtime.current_timestamp)
 
-		self.clock_backtest.backtest()
-		self.clock_realtime.backtest()
+		self.clock_backtest.backtest_til()
+		self.clock_realtime.backtest_til()
 
 		self.assertEqual(self.backtest_end_timestamp, self.clock_backtest.current_timestamp)
 		self.assertLessEqual(self.realtime_end_timestamp, self.clock_realtime.current_timestamp)
@@ -83,18 +82,13 @@ class ClockTest(unittest.TestCase):
 		self.assertEqual(0, len(self.clock_backtest.child_iterators))
 
 	def test_run(self):
-		# Note: Technically you do not execute `run()` when in BACKTEST mode
-		# Tests EnvironmentError raised when not runnning within a context
 		with self.assertRaises(EnvironmentError):
 			self.ev_loop.run_until_complete(self.clock_realtime.run())
-		# Note: run() will essentially run indefinitely hence the enforced timeout.
 		with self.assertRaises(asyncio.TimeoutError), self.clock_realtime:
 			self.ev_loop.run_until_complete(asyncio.wait_for(self.clock_realtime.run(), 1))
 		self.assertLess(self.realtime_start_timestamp, self.clock_realtime.current_timestamp)
 
 	def test_run_til(self):
-		# Note: Technically you do not execute `run_til()` when in BACKTEST mode
-		# Tests EnvironmentError raised when not runnning within a context
 		with self.assertRaises(EnvironmentError):
 			self.ev_loop.run_until_complete(self.clock_realtime.run_til(self.realtime_end_timestamp))
 		with self.clock_realtime:
@@ -102,8 +96,7 @@ class ClockTest(unittest.TestCase):
 		self.assertGreaterEqual(self.clock_realtime.current_timestamp, self.realtime_end_timestamp)
 
 	def test_backtest(self):
-		# Note: Technically you do not execute `backtest()` when in REALTIME mode
-		self.clock_backtest.backtest()
+		self.clock_backtest.backtest_til()
 		self.assertGreaterEqual(self.clock_backtest.current_timestamp, self.backtest_end_timestamp)
 
 

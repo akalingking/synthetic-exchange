@@ -83,8 +83,8 @@ cdef class Clock:
 						child_iterator.c_tick(self._current_tick)
 					except StopIteration:
 						raise
-					except Exception:
-						self.logger().error("Unexpected error running clock tick.", exc_info=True)
+					except Exception as e:
+						logging.error(f"Clock.c_backtest_til e: {e}")
 		except StopIteration:
 			return
 		finally:
@@ -92,7 +92,7 @@ cdef class Clock:
 				child_iterator = ci
 				child_iterator._clock = None
 
-	def backtest(self, end_time: float=None):
+	def backtest_til(self, end_time: float=None):
 		if end_time is not None:
 			self.c_backtest_til(end_time)
 		else:
@@ -134,10 +134,10 @@ cdef class Clock:
 					try:
 						child_iterator.c_tick(self._current_tick)
 					except StopIteration:
-						self.logger().error("Stop iteration triggered in real time mode. This is not expected.")
+						logging.error("Clock.run_til stop iteration triggered in real time mode")
 						return
-					except Exception:
-						self.logger().error("Unexpected error running clock tick.", exc_info=True)
+					except Exception as e:
+						logging.error(f"Clock.run_til e: {e}")
 		finally:
 			for ci in self._current_context:
 				child_iterator = ci

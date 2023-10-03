@@ -22,7 +22,7 @@ class TimeIteratorTest(unittest.TestCase):
 		# On initialization, current_timestamp should be NaN
 		self.assertTrue(math.isnan(self.time_iterator.current_timestamp))
 		self.time_iterator.start(self.clock)
-		self.clock.backtest(self.start_timestamp)
+		self.clock.backtest_til(self.start_timestamp)
 		self.assertEqual(self.start_timestamp, self.time_iterator.current_timestamp)
 
 	def test_clock(self):
@@ -49,7 +49,7 @@ class TimeIteratorTest(unittest.TestCase):
 		self.time_iterator.start(self.clock)
 		self.assertEqual(self.start_timestamp, self.time_iterator.current_timestamp)
 		# c_tick is called within Clock
-		self.clock.backtest(self.start_timestamp + self.tick_size)
+		self.clock.backtest_til(self.start_timestamp + self.tick_size)
 		self.assertEqual(self.start_timestamp + self.tick_size, self.time_iterator.current_timestamp)
 
 
