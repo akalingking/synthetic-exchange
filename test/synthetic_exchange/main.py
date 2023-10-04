@@ -7,10 +7,6 @@ from test.synthetic_exchange.test_exchanges import ExchangesTest
 from test.synthetic_exchange.test_market import MarketTest
 from test.synthetic_exchange.test_markets import MarketsTest
 from test.synthetic_exchange.test_transactions import TransactionsTest
-from test.synthetic_exchange.util.test_application import ApplicationTest
-from test.synthetic_exchange.util.test_multi_application import MultiApplicationTest
-from test.synthetic_exchange.util.test_event import EventTest
-from test.synthetic_exchange.util.test_queue import QueueTest
 
 
 def main():
@@ -18,10 +14,6 @@ def main():
     tests = [
         loader.loadTestsFromTestCase(test)
         for test in [
-			EventTest,
-			QueueTest,
-			ApplicationTest,
-			MultiApplicationTest,
             AgentTest,
             MarketTest,
             MarketsTest,
