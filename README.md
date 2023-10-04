@@ -4,12 +4,21 @@ Agent based generated timeseries data for simulating market conditions.
 
 ## Install ##
 ```
+python -m pip install -r requirements.txt
+
+or
+
 python setup.py install
 ```
 
-## Uninstall ##
+## Test ##
 ```
-python -m pip uninstall synthetic-exchange
+./scripts/run_ut.sh
+```
+
+## Run Synthetic Data ##
+```
+./bin/run_app
 ```
 
 ## References ##
