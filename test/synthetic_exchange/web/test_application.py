@@ -11,7 +11,7 @@ class ApplicationTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._wait = 10 * 30
+        cls._wait = 30 * 1
         cls._config = {"application": {}}
         cls._exchange = WebApplication(**cls._config)
 
@@ -34,8 +34,7 @@ class ApplicationTest(unittest.TestCase):
 
         self._exchange.stop()
 
-        symbols = self._exchange.symbols()
-
+        symbols = self._exchange._markets.keys()
         for symbol in symbols:
             print(f"******exchange: {self._exchange.name} symbol: {symbol} orderbook*******")
             ob_ = self._exchange.orderbook(symbol=symbol)

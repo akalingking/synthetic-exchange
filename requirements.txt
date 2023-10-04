@@ -6,10 +6,6 @@ flask
 flask_restful
 waitress
 matplotlib
-json
-linecache
-tracemalloc
-gzip
-itertools
 asyncio
+async-timeout
 Cython
