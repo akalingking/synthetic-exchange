@@ -2,12 +2,24 @@ import unittest
 import logging
 import pandas as pd
 import json
+import datetime as dt
 from synthetic_exchange.experimental.backtest_exchange import BacktestExchange
 from synthetic_exchange.experimental.event import Event
 from synthetic_exchange.experimental.events import Events
 from synthetic_exchange.detail.clock import Clock, ClockMode
 from synthetic_exchange.util.event_parser import Parser
 from synthetic_exchange.experimental.dtype import Instrument, AssetType
+
+
+class BacktestSimple(BacktestExchange):
+	def __init__(self, config={}, trading_pairs=[], events=[]):
+		BacktestExchange.__init__(self, config, trading_pairs, events)
+
+	def process_event(self, timestamp, event):
+	    print(
+           f"{__class__.__name__}.tick timestamp: {dt.datetime.utcfromtimestamp(timestamp)} "
+           f"now: {dt.datetime.utcfromtimestamp(event.now/1e9)} event: {event}"
+        )
 
 
 class BacktestEventTest(unittest.TestCase):
@@ -48,7 +60,7 @@ class BacktestEventTest(unittest.TestCase):
 		events.add(rows, instrument=trading_pair, verbose=True)
 		start = pd.Timestamp("2023-09-08-12:30:00", tz="UTC")
 		end = pd.Timestamp("2023-09-08-13:00:10", tz="UTC")
-		backtest = BacktestExchange(config={}, trading_pairs=[trading_pair], events=events)
+		backtest = BacktestSimple(config={}, trading_pairs=[trading_pair], events=events)
 		clock = Clock(ClockMode.Backtest, start_time=start.timestamp(), end_time=end.timestamp())
 		clock.add_iterator(backtest)
 		clock.backtest_til(end.timestamp())

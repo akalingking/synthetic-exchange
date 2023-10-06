@@ -22,7 +22,13 @@ cdef class BacktestExchange(TimeIterator):
 		self._event_size = len(self._exchange_events)
 
 	def tick(self, timestamp: float):
+		pass
 		#print(f"BacktestExchange.tick timestamp: {timestamp} entry")
+		#print(f"BacktestExchange.tick timestamp: {timestamp} exit")
+
+	cdef c_tick(self, double timestamp):
+		TimeIterator.c_tick(self, timestamp)
+		self.tick(timestamp)
 		while self._event_pos < self._event_size:
 			event = self._exchange_events[self._event_pos]
 			if timestamp >= event.now/1e9:
@@ -30,11 +36,6 @@ cdef class BacktestExchange(TimeIterator):
 				self.c_process_event(timestamp, event)
 			else:
 				break
-		#print(f"BacktestExchange.tick timestamp: {timestamp} exit")
-
-	cdef c_tick(self, double timestamp):
-		TimeIterator.c_tick(self, timestamp)
-		self.tick(timestamp)
 
 	cdef c_start(self, Clock clock, double timestamp):
 		self._event_pos = 0
@@ -47,7 +48,11 @@ cdef class BacktestExchange(TimeIterator):
 		self.stop(clock=clock)
 
 	cdef c_process_event(self, double timestamp, Event event):
-		print(
-			f"BacktestExchange.tick timestamp: {dt.datetime.utcfromtimestamp(timestamp)} "
-			f"now: {dt.datetime.utcfromtimestamp(event.now/1e9)} event: {event}"
-		)
+		self.process_event(timestamp, event)
+
+	def process_event(self, timestamp, event):
+		raise NotImplementedError()
+		#print(
+		#	f"BacktestExchange.tick timestamp: {dt.datetime.utcfromtimestamp(timestamp)} "
+		#	f"now: {dt.datetime.utcfromtimestamp(event.now/1e9)} event: {event}"
+		#)
