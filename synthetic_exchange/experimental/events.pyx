@@ -10,6 +10,7 @@ from synthetic_exchange.experimental.event cimport (
 	EventBBO,
 	EventSnapshot,
 	EventDiff,
+	EventFundingInfo,
 )
 
 
@@ -167,6 +168,18 @@ cpdef Event parse_event(dict data, str instrument):
 			asks=<list>data["asks"],
 			update_id=<long>data["update_id"],
 			prev_update_id=<long>data["prev_update_id"]
+		)
+
+	elif type == "fundinginfo":
+		event = EventFundingInfo(
+			time=<long>data["time"],
+			now=<long>data["now"],
+			instrument=<str>instrument,
+			index_price=<double>data["i"],
+			mark_price=<double>data["p"],
+			price=<double>data["P"],
+			rate=<double>data["r"],
+			next_funding_utc_timestamp=<long>data["T"]
 		)
 
 	else:

@@ -2,6 +2,7 @@ from enum import Enum
 import logging
 import gzip
 import json
+from typing import List
 from synthetic_exchange.experimental.dtype import Instrument, AssetType, ExchangeType, NameToExchangeType
 
 
@@ -61,8 +62,8 @@ class Parser:
 		return events
 
 	@staticmethod
-	def _parse_binance_perp(rows: list, instrument: Instrument, verbose: bool=False) -> list:
-		logging.debug(f"Parser._parse_binance_perp row size: {len(rows)} entry")
+	def _parse_binance_perp(rows: list, instrument: Instrument, verbose: bool=False) -> List[str]:
+		# logging.debug(f"Parser._parse_binance_perp row size: {len(rows)} entry")
 
 		events = []
 		exchange = instrument.exchange
@@ -239,8 +240,8 @@ class Parser:
 					warning_count += 1
 					continue
 
-				if verbose:
-					logging.debug(f"Parser.parse add new event: {new_event}")
+				#if verbose:
+				#	logging.debug(f"Parser.parse add new event: {new_event}")
 				events.append(new_event)
 			except Exception as e:
 				logging.error(
@@ -249,9 +250,10 @@ class Parser:
 				)
 				break
 
-		logging.debug(
-			"Parser._parse_binance_perp row size: {} event size: {} ignored events: {} warning count: {} exception count: {}".format(
-				len(rows), len(events), ignored_event_count, warning_count, exception_count
+		if verbose:
+			logging.debug(
+				"Parser._parse_binance_perp row size: {} event size: {} ignored events: {} warning count: {} exception count: {}".format(
+					len(rows), len(events), ignored_event_count, warning_count, exception_count
+				)
 			)
-		)
 		return events

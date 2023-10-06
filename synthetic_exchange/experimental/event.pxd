@@ -62,3 +62,12 @@ cdef class EventDiff(Event):
 		list asks
 		long update_id
 		long prev_update_id
+
+cdef class EventFundingInfo(Event):
+	cdef public:
+		double price
+		double index_price
+		double mark_price
+		double next_funding_utc_timestamp
+		double rate
+

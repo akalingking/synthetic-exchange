@@ -6,6 +6,8 @@ from libcpp.utility cimport pair
 
 from synthetic_exchange.detail.clock cimport TimeIterator
 from synthetic_exchange.detail.event_reporter cimport EventReporter
+from synthetic_exchange.experimental.events cimport Events
+from synthetic_exchange.experimental.event cimport Event
 from synthetic_exchange.experimental.event_logger cimport EventLogger
 from synthetic_exchange.experimental.LimitOrder cimport LimitOrder as CPPLimitOrder
 from synthetic_exchange.experimental.OrderExpirationEntry cimport OrderExpirationEntry as CPPOrderExpirationEntry
@@ -40,6 +42,11 @@ cdef class BacktestExchange(TimeIterator):
 		object _queued_orders
 		object _order_book_trade_listener
 		object _market_order_filled_listener
+		Events _exchange_events
+		int _event_pos
+		int _event_size
+
+	cdef c_process_event(self, double timestamp, Event event)
 		
 
 	"""
@@ -58,4 +65,3 @@ cdef class BacktestExchange(TimeIterator):
 	cdef c_process_limit_bid_orders(self)
 	cdef c_process_limit_ask_orders(self)
 	"""
-	pass

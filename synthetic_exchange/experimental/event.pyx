@@ -156,3 +156,29 @@ cdef class EventDiff(Event):
 		s += f" bids: {self.bids} asks: {self.asks} "
 		s += f" update_id: {self.update_id} prev update id: {self.prev_update_id}"
 		return s
+
+cdef class EventFundingInfo(Event):
+	def __init__(self, **kwargs):
+		Event.__init__(self, **kwargs)
+		self.type = EventType.EventType_FundingInfo
+		self.price = kwargs.get("bids")
+		self.mark_price = kwargs.get("asks")
+		self.index_price = kwargs.get("update_id")
+		self.rate = kwargs.get("prev_update_id")
+		self.next_funding_utc_timestamp = kwargs.get("next_funding_utc_timestamp")
+
+	cdef Event copy(self):
+		event = Event.copy(self)
+		event.price= self.price
+		event.mark_price = self.mark_price
+		event.index_price = self.index_price
+		event.rate = self.rate
+		event.next_funding_utc_timestamp = self.next_funding_utc_timestamp
+		return event
+
+	def __str__(self):
+		s = Event.__str__(self)
+		s += f" mark_price: {self.mark_price} index_price: {self.index_price} "
+		s += f" rate: {self.rate} next funding utc timestamp: {self.next_funding_utc_timestamp}"
+		return s
+
