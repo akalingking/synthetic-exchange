@@ -1,6 +1,21 @@
 #distutils: sources=["synthetic_exchange/experimental/LimitOrder.cpp"]
 import datetime as dt
 from synthetic_exchange.detail.clock cimport Clock, TimeIterator
+from synthetic_exchange.detail.event_listener cimport EventListener
+from synthetic_exchange.experimental.event import Event
+
+"""
+cdef class OrderBookTradeListener(EventListner):
+	cdef TimeIterator _owner
+	def __init__(self, owner):
+		EventListener.__init__(self)
+		self._owner = owner
+	cdef c_call(self, Event event):
+		try:
+			self._owner.on_trade_event(event)
+		except Exception as e:
+			logging.error("OrderBookTradeListener e: {}".format(str(e))
+"""
 
 
 cdef class BacktestExchange(TimeIterator):
@@ -21,10 +36,11 @@ cdef class BacktestExchange(TimeIterator):
 		self._event_pos = 0
 		self._event_size = len(self._exchange_events)
 
+		#self._orderbook_trade_listener = OrderBookTradeListene(self)
+		#self.c_add_listener(EventType.EventType_Trade.value, self._orderbook_trade_listener)
+
 	def tick(self, timestamp: float):
 		pass
-		#print(f"BacktestExchange.tick timestamp: {timestamp} entry")
-		#print(f"BacktestExchange.tick timestamp: {timestamp} exit")
 
 	cdef c_tick(self, double timestamp):
 		TimeIterator.c_tick(self, timestamp)
@@ -51,8 +67,7 @@ cdef class BacktestExchange(TimeIterator):
 		self.process_event(timestamp, event)
 
 	def process_event(self, timestamp, event):
-		raise NotImplementedError()
-		#print(
-		#	f"BacktestExchange.tick timestamp: {dt.datetime.utcfromtimestamp(timestamp)} "
-		#	f"now: {dt.datetime.utcfromtimestamp(event.now/1e9)} event: {event}"
-		#)
+		pass
+		#if event.type = EventType.EventType_Trade:
+		#	self.c_trigger_event(EventType.EventType_Trade.value, event)
+		

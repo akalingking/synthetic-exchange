@@ -120,7 +120,7 @@ def main():
         url=f"https://github.com/akalingking/{project_name}",
         author="Ariel Kalingking",
         author_email="akalingking@gmail.com",
-        license="Private",
+        license="Apache Licence",
         classifiers=[
             "Programming Language :: Python :: 3",
             "Operating System :: OS Independent",

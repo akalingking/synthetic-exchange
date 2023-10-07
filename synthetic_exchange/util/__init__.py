@@ -1,9 +1,12 @@
+import asyncio
 import json
 import linecache
+import logging
 import os
 import tracemalloc
-from .observer import Event, ProcessEvent
+
 from .application import Application
+from .observer import Event, ProcessEvent
 
 
 def _trace_top_malloc(snapshot, key_type="lineno", limit=5):
@@ -52,9 +55,10 @@ def get_config_from_file(fname: str) -> dict:
         print(f"_get_config_from_file exception: '{e}'")
     return retval
 
+
 def bisect_right(a, x, lo=0, hi=None, *, key=None):
     if lo < 0:
-        raise ValueError('lo must be non-negative')
+        raise ValueError("lo must be non-negative")
     if hi is None:
         hi = len(a)
     if key is None:
@@ -73,9 +77,10 @@ def bisect_right(a, x, lo=0, hi=None, *, key=None):
                 lo = mid + 1
     return lo
 
+
 def bisect_left(a, x, lo=0, hi=None, *, key=None):
     if lo < 0:
-        raise ValueError('lo must be non-negative')
+        raise ValueError("lo must be non-negative")
     if hi is None:
         hi = len(a)
     if key is None:
@@ -93,3 +98,16 @@ def bisect_left(a, x, lo=0, hi=None, *, key=None):
             else:
                 hi = mid
     return lo
+
+
+async def safe_wrapper(c):
+    try:
+        return await c
+    except asyncio.CancelledError:
+        raise
+    except Exception as e:
+        logging.getLogger(__name__).error(f"Unhandled error in background task: {str(e)}", exc_info=True)
+
+
+def safe_ensure_future(coro, *args, **kwargs):
+    return asyncio.ensure_future(safe_wrapper(coro), *args, **kwargs)
