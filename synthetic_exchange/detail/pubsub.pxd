@@ -4,8 +4,8 @@ from libc.stdint cimport int64_t
 from libcpp.unordered_map cimport unordered_map
 from libcpp.unordered_set cimport unordered_set
 from libcpp.utility cimport pair
-from synthetic_exchange.detail.PyRef cimport PyRef
-from synthetic_exchange.detail.event_listener cimport EventListener
+from .PyRef cimport PyRef
+from .event_listener cimport EventListener
 
 ctypedef unordered_set[PyRef] EventListenersCollection
 ctypedef unordered_set[PyRef].iterator EventListenersIterator

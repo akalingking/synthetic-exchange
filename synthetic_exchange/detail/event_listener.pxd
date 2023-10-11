@@ -1,5 +1,6 @@
+# distutils: language=c++
 from libc.stdint cimport int64_t
-from synthetic_exchange.detail.pubsub cimport PubSub
+from .pubsub cimport PubSub
 
 
 cdef class EventListener:

@@ -1,4 +1,5 @@
-from synthetic_exchange.detail.pubsub cimport PubSub
+# distutils: language=c++
+from .pubsub cimport PubSub
 
 cpdef enum ClockMode:
 	Realtime = 1

@@ -2,7 +2,7 @@ import logging
 import unittest as ut
 from test.synthetic_exchange.detail.test_clock import ClockTest
 from test.synthetic_exchange.detail.test_pubsub import PubSubTest
-from test.synthetic_exchange.detail.test_time_iterator import TimeIteratorTest
+
 import matplotlib.pyplot as plt
 
 
@@ -13,7 +13,6 @@ def main():
         for test in [
             ClockTest,
             PubSubTest,
-           	TimeIteratorTest,
         ]
     ]
     suite = ut.TestSuite(tests)

@@ -1,4 +1,4 @@
-from synthetic_exchange.detail.pubsub import PubSub
+from .pubsub import PubSub
 
 
 cdef class EventListener:
